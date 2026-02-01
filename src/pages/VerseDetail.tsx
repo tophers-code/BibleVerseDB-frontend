@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getVerse, deleteVerse } from '../api/client';
+import { getVerse, deleteVerse, getVerses, addVerseReference, removeVerseReference } from '../api/client';
 import type { Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
 
@@ -8,15 +8,60 @@ export default function VerseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [verse, setVerse] = useState<Verse | null>(null);
+  const [allVerses, setAllVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedVerseId, setSelectedVerseId] = useState<string>('');
+  const [addingReference, setAddingReference] = useState(false);
+  const [showReferenceForm, setShowReferenceForm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
-      getVerse(parseInt(id))
-        .then((res) => setVerse(res.data))
+      Promise.all([getVerse(parseInt(id)), getVerses()])
+        .then(([verseRes, versesRes]) => {
+          setVerse(verseRes.data);
+          setAllVerses(versesRes.data);
+        })
         .finally(() => setLoading(false));
     }
   }, [id]);
+
+  const refreshVerse = async () => {
+    if (id) {
+      const res = await getVerse(parseInt(id));
+      setVerse(res.data);
+    }
+  };
+
+  const handleAddReference = async () => {
+    if (!verse || !selectedVerseId) return;
+
+    setAddingReference(true);
+    setError(null);
+
+    try {
+      await addVerseReference(verse.id, parseInt(selectedVerseId));
+      await refreshVerse();
+      setSelectedVerseId('');
+      setShowReferenceForm(false);
+    } catch (err: any) {
+      setError(err.response?.data?.errors?.join(', ') || 'Failed to add reference');
+    } finally {
+      setAddingReference(false);
+    }
+  };
+
+  const handleRemoveReference = async (referencedVerseId: number) => {
+    if (!verse) return;
+    if (!window.confirm('Remove this reference?')) return;
+
+    try {
+      await removeVerseReference(verse.id, referencedVerseId);
+      await refreshVerse();
+    } catch (err: any) {
+      setError(err.response?.data?.errors?.join(', ') || 'Failed to remove reference');
+    }
+  };
 
   const handleDelete = async () => {
     if (verse && window.confirm('Are you sure you want to delete this verse?')) {
@@ -82,27 +127,86 @@ export default function VerseDetail() {
           </div>
         )}
 
-        {verse.referenced_verses && verse.referenced_verses.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-sm font-medium text-gray-700 mb-2">References</h2>
-            <ul className="space-y-1">
-              {verse.referenced_verses.map((ref) => (
-                <li key={ref.id}>
-                  <Link
-                    to={`/verses/${ref.id}`}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    {ref.reference}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+            {error}
           </div>
         )}
+
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-sm font-medium text-gray-700">Cross-References</h2>
+            <button
+              onClick={() => setShowReferenceForm(!showReferenceForm)}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              {showReferenceForm ? 'Cancel' : '+ Add Reference'}
+            </button>
+          </div>
+
+          {showReferenceForm && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-md">
+              <div className="flex gap-2">
+                <select
+                  value={selectedVerseId}
+                  onChange={(e) => setSelectedVerseId(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a verse to reference...</option>
+                  {allVerses
+                    .filter((v) => v.id !== verse.id)
+                    .filter((v) => !verse.referenced_verses?.some((ref) => ref.id === v.id))
+                    .map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.reference}
+                      </option>
+                    ))}
+                </select>
+                <button
+                  onClick={handleAddReference}
+                  disabled={!selectedVerseId || addingReference}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 disabled:opacity-50"
+                >
+                  {addingReference ? 'Adding...' : 'Add'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {verse.referenced_verses && verse.referenced_verses.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">This verse references:</p>
+              <ul className="space-y-1">
+                {verse.referenced_verses.map((ref) => (
+                  <li key={ref.id} className="flex items-center justify-between group">
+                    <Link
+                      to={`/verses/${ref.id}`}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      {ref.reference}
+                    </Link>
+                    <button
+                      onClick={() => handleRemoveReference(ref.id)}
+                      className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Remove reference"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No cross-references added yet.</p>
+          )}
+        </div>
 
         {verse.referencing_verses && verse.referencing_verses.length > 0 && (
           <div className="mb-6">
             <h2 className="text-sm font-medium text-gray-700 mb-2">Referenced By</h2>
+            <p className="text-xs text-gray-500 mb-2">Other verses that reference this one:</p>
             <ul className="space-y-1">
               {verse.referencing_verses.map((ref) => (
                 <li key={ref.id}>
