@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+:root {
+  --color-yellow: #fbbf24;
+  --color-purple: #8b5cf6;
+  --color-orange: #f97316;
+  --color-blue: #3b82f6;
+  --color-teal: #14b8a6;
+  --color-pink: #ec4899;
+  --color-pink-black: #9d174d;
+  --color-red-black: #7f1d1d;
+  --color-black: #1f2937;
+  --color-red: #ef4444;
+  --color-green: #22c55e;
+  --color-light-green: #86efac;
+  --color-brown: #92400e;
+}
