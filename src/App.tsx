@@ -8,6 +8,8 @@ import CategoryList from './pages/CategoryList';
 import CategoryDetail from './pages/CategoryDetail';
 import BookList from './pages/BookList';
 import ProgressionList from './pages/ProgressionList';
+import ProgressionForm from './pages/ProgressionForm';
+import ProgressionDetail from './pages/ProgressionDetail';
 
 function App() {
   return (
@@ -23,6 +25,9 @@ function App() {
           <Route path="categories/:id" element={<CategoryDetail />} />
           <Route path="books" element={<BookList />} />
           <Route path="progressions" element={<ProgressionList />} />
+          <Route path="progressions/new" element={<ProgressionForm />} />
+          <Route path="progressions/:id" element={<ProgressionDetail />} />
+          <Route path="progressions/:id/edit" element={<ProgressionForm />} />
         </Route>
       </Routes>
     </BrowserRouter>
