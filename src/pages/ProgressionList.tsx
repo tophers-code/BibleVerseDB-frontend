@@ -63,12 +63,20 @@ export default function ProgressionList() {
                     <p className="text-gray-600 text-sm mt-1">{progression.description}</p>
                   )}
                 </div>
-                <button
-                  onClick={() => handleDelete(progression.id)}
-                  className="text-sm text-red-600 hover:text-red-800"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-3">
+                  <Link
+                    to={`/progressions/${progression.id}/edit`}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(progression.id)}
+                    className="text-sm text-red-600 hover:text-red-800"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
 
               {progression.steps.length > 0 && (
