@@ -49,4 +49,30 @@ export const updateProgressionStep = (progressionId: number, stepId: number, ste
 export const removeProgressionStep = (progressionId: number, stepId: number) =>
   api.delete(`/progressions/${progressionId}/steps/${stepId}`);
 
+// Verse Texts
+export interface VerseTextResponse {
+  version: string;
+  text: string;
+  version_name: string;
+}
+
+export interface VerseTextsListResponse {
+  supported_versions: Record<string, string>;
+  texts: { version: string; text: string }[];
+}
+
+export interface FetchTextsResponse {
+  reference: string;
+  texts: VerseTextResponse[];
+}
+
+export const getVerseTexts = (verseId: number) =>
+  api.get<VerseTextsListResponse>(`/verses/${verseId}/texts`);
+
+export const getVerseText = (verseId: number, version: string) =>
+  api.get<VerseTextResponse>(`/verses/${verseId}/texts`, { params: { version } });
+
+export const fetchAllVerseTexts = (verseId: number) =>
+  api.post<FetchTextsResponse>(`/verses/${verseId}/fetch_texts`);
+
 export default api;

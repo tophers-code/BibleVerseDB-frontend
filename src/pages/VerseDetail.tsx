@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getVerse, deleteVerse, getVerses, addVerseReference, removeVerseReference } from '../api/client';
+import { getVerse, deleteVerse, getVerses, addVerseReference, removeVerseReference, getVerseTexts, fetchAllVerseTexts, type VerseTextResponse } from '../api/client';
 import type { Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
+
+const VERSION_NAMES: Record<string, string> = {
+  'en-asv': 'American Standard Version',
+  'en-t4t': 'Translation for Translators',
+  'en-bsb': 'Berean Study Bible',
+  'en-web': 'World English Bible',
+};
 
 export default function VerseDetail() {
   const { id } = useParams();
@@ -14,17 +21,39 @@ export default function VerseDetail() {
   const [addingReference, setAddingReference] = useState(false);
   const [showReferenceForm, setShowReferenceForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [verseTexts, setVerseTexts] = useState<VerseTextResponse[]>([]);
+  const [fetchingTexts, setFetchingTexts] = useState(false);
+  const [selectedVersion, setSelectedVersion] = useState<string>('en-bsb');
 
   useEffect(() => {
     if (id) {
-      Promise.all([getVerse(parseInt(id)), getVerses()])
-        .then(([verseRes, versesRes]) => {
+      Promise.all([getVerse(parseInt(id)), getVerses(), getVerseTexts(parseInt(id))])
+        .then(([verseRes, versesRes, textsRes]) => {
           setVerse(verseRes.data);
           setAllVerses(versesRes.data);
+          if (textsRes.data.texts) {
+            setVerseTexts(textsRes.data.texts.map(t => ({ ...t, version_name: VERSION_NAMES[t.version] || t.version })));
+          }
         })
         .finally(() => setLoading(false));
     }
   }, [id]);
+
+  const handleFetchTexts = async () => {
+    if (!verse) return;
+
+    setFetchingTexts(true);
+    setError(null);
+
+    try {
+      const res = await fetchAllVerseTexts(verse.id);
+      setVerseTexts(res.data.texts);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch verse texts');
+    } finally {
+      setFetchingTexts(false);
+    }
+  };
 
   const refreshVerse = async () => {
     if (id) {
@@ -103,6 +132,48 @@ export default function VerseDetail() {
           <span className="text-sm text-gray-500">
             {verse.bible_book.testament === 'old_testament' ? 'Old Testament' : 'New Testament'}
           </span>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-sm font-medium text-gray-700">Verse Text</h2>
+            <button
+              onClick={handleFetchTexts}
+              disabled={fetchingTexts}
+              className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+            >
+              {fetchingTexts ? 'Fetching...' : verseTexts.length > 0 ? 'Refresh' : 'Fetch Text'}
+            </button>
+          </div>
+
+          {verseTexts.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {verseTexts.map((vt) => (
+                  <button
+                    key={vt.version}
+                    onClick={() => setSelectedVersion(vt.version)}
+                    className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                      selectedVersion === vt.version
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {vt.version_name || VERSION_NAMES[vt.version] || vt.version}
+                  </button>
+                ))}
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p className="text-gray-800 leading-relaxed italic">
+                  {verseTexts.find((vt) => vt.version === selectedVersion)?.text || 'Select a version'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">
+              Click "Fetch Text" to load the verse text from Bible API.
+            </p>
+          )}
         </div>
 
         <div className="mb-6">
