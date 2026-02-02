@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getProgression, deleteProgression } from '../api/client';
+import { getProgression, deleteProgression, getVerseText } from '../api/client';
 import type { VerseProgression } from '../types';
+
+const VERSIONS = [
+  { id: 'en-bsb', name: 'Berean Study Bible' },
+  { id: 'en-asv', name: 'American Standard Version' },
+  { id: 'en-web', name: 'World English Bible' },
+  { id: 'en-t4t', name: 'Translation for Translators' },
+];
 
 export default function ProgressionDetail() {
   const { id } = useParams();
@@ -9,6 +16,9 @@ export default function ProgressionDetail() {
   const [progression, setProgression] = useState<VerseProgression | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState('en-bsb');
+  const [verseTexts, setVerseTexts] = useState<Record<number, string>>({});
+  const [loadingTexts, setLoadingTexts] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -18,6 +28,30 @@ export default function ProgressionDetail() {
       .catch(() => setError('Failed to load progression'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Fetch verse texts when progression loads or version changes
+  useEffect(() => {
+    if (!progression || progression.steps.length === 0) return;
+
+    const fetchTexts = async () => {
+      setLoadingTexts(true);
+      const texts: Record<number, string> = {};
+
+      for (const step of progression.steps) {
+        try {
+          const res = await getVerseText(step.verse.id, selectedVersion);
+          texts[step.verse.id] = res.data.text;
+        } catch {
+          texts[step.verse.id] = '';
+        }
+      }
+
+      setVerseTexts(texts);
+      setLoadingTexts(false);
+    };
+
+    fetchTexts();
+  }, [progression, selectedVersion]);
 
   const handleDelete = async () => {
     if (!progression) return;
@@ -72,9 +106,25 @@ export default function ProgressionDetail() {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">
-          Progression Steps ({progression.steps.length})
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-slate-800">
+            Progression Steps ({progression.steps.length})
+          </h2>
+          {progression.steps.length > 0 && (
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">Translation:</label>
+              <select
+                value={selectedVersion}
+                onChange={(e) => setSelectedVersion(e.target.value)}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {VERSIONS.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
 
         {progression.steps.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -108,9 +158,22 @@ export default function ProgressionDetail() {
                       {step.verse.reference}
                     </Link>
 
+                    {/* Verse text */}
+                    <div className="mt-2">
+                      {loadingTexts ? (
+                        <p className="text-gray-400 text-sm italic">Loading...</p>
+                      ) : verseTexts[step.verse.id] ? (
+                        <p className="text-gray-700 italic leading-relaxed">
+                          "{verseTexts[step.verse.id]}"
+                        </p>
+                      ) : (
+                        <p className="text-gray-400 text-sm">No text available</p>
+                      )}
+                    </div>
+
                     {/* Arrow indicator for flow */}
                     {index < progression.steps.length - 1 && (
-                      <div className="mt-2 text-gray-400 text-sm flex items-center gap-1">
+                      <div className="mt-3 text-gray-400 text-sm flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                         </svg>
