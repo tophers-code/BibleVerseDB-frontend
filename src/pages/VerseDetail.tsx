@@ -31,8 +31,13 @@ export default function VerseDetail() {
         .then(([verseRes, versesRes, textsRes]) => {
           setVerse(verseRes.data);
           setAllVerses(versesRes.data);
-          if (textsRes.data.texts) {
-            setVerseTexts(textsRes.data.texts.map(t => ({ ...t, version_name: VERSION_NAMES[t.version] || t.version })));
+          const texts = textsRes.data.texts || [];
+          if (texts.length > 0) {
+            setVerseTexts(texts);
+            // Set selected version to first available if current isn't in the list
+            if (!texts.find((t: VerseTextResponse) => t.version === selectedVersion)) {
+              setSelectedVersion(texts[0].version);
+            }
           }
         })
         .finally(() => setLoading(false));
@@ -47,7 +52,12 @@ export default function VerseDetail() {
 
     try {
       const res = await fetchAllVerseTexts(verse.id);
-      setVerseTexts(res.data.texts);
+      const texts = res.data.texts || [];
+      setVerseTexts(texts.filter((t: VerseTextResponse) => t.text));
+      // Set selected version to first available if current isn't available
+      if (texts.length > 0 && !texts.find((t: VerseTextResponse) => t.version === selectedVersion)) {
+        setSelectedVersion(texts[0].version);
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to fetch verse texts');
     } finally {
