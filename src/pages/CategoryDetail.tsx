@@ -38,13 +38,14 @@ export default function CategoryDetail() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <CategoryTag category={category} />
         <h1 className="text-2xl font-bold text-slate-800 mt-2">{category.name}</h1>
-        <p className="text-gray-600 mt-1">Study of {category.meaning}</p>
+        <p className="text-gray-600 mt-1">{category.meaning}</p>
+        <p className="text-sm text-gray-500 mt-3">
+          {verses.length} {verses.length === 1 ? 'verse' : 'verses'} in this category
+        </p>
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">
-          Verses in this Category ({verses.length})
-        </h2>
+        <h2 className="text-xl font-semibold text-slate-800 mb-4">Verses</h2>
         {verses.length === 0 ? (
           <p className="text-gray-500">No verses in this category yet.</p>
         ) : (

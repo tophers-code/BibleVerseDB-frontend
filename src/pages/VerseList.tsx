@@ -48,9 +48,16 @@ export default function VerseList() {
     setSearchParams(searchParams);
   };
 
+  const hasFilters = categoryFilter || bookFilter;
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800">All Verses</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-slate-800">All Verses</h1>
+        <span className="text-gray-500">
+          {loading ? '...' : `${verses.length} ${verses.length === 1 ? 'verse' : 'verses'}${hasFilters ? ' (filtered)' : ''}`}
+        </span>
+      </div>
 
       <div className="flex flex-wrap gap-4 bg-white p-4 rounded-lg shadow">
         <div>
