@@ -7,7 +7,7 @@ import {
   getVerses,
   addProgressionStep,
   removeProgressionStep,
-  updateProgressionStep,
+  reorderProgressionSteps,
 } from '../api/client';
 import type { Verse, VerseProgression, ProgressionStep } from '../types';
 
@@ -94,14 +94,10 @@ export default function ProgressionForm() {
 
     try {
       await removeProgressionStep(progressionId, stepId);
-      const remainingSteps = steps.filter((s) => s.id !== stepId);
-      // Reorder remaining steps
-      for (let i = 0; i < remainingSteps.length; i++) {
-        if (remainingSteps[i].step_order !== i + 1) {
-          await updateProgressionStep(progressionId, remainingSteps[i].id, i + 1);
-          remainingSteps[i] = { ...remainingSteps[i], step_order: i + 1 };
-        }
-      }
+      // Backend automatically reorders remaining steps
+      const remainingSteps = steps
+        .filter((s) => s.id !== stepId)
+        .map((s, i) => ({ ...s, step_order: i + 1 }));
       setSteps(remainingSteps);
     } catch (err: any) {
       setError(err.response?.data?.errors?.join(', ') || 'Failed to remove step');
@@ -115,19 +111,18 @@ export default function ProgressionForm() {
     if (newIndex < 0 || newIndex >= steps.length) return;
 
     try {
+      // Create new order array
       const newSteps = [...steps];
       const [movedStep] = newSteps.splice(stepIndex, 1);
       newSteps.splice(newIndex, 0, movedStep);
 
-      // Update orders in backend
-      for (let i = 0; i < newSteps.length; i++) {
-        if (newSteps[i].step_order !== i + 1) {
-          await updateProgressionStep(progressionId, newSteps[i].id, i + 1);
-          newSteps[i] = { ...newSteps[i], step_order: i + 1 };
-        }
-      }
+      // Update step_order values locally
+      const reorderedSteps = newSteps.map((s, i) => ({ ...s, step_order: i + 1 }));
 
-      setSteps(newSteps);
+      // Send new order to backend
+      await reorderProgressionSteps(progressionId, reorderedSteps.map(s => s.id));
+
+      setSteps(reorderedSteps);
     } catch (err: any) {
       setError(err.response?.data?.errors?.join(', ') || 'Failed to reorder steps');
     }

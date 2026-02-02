@@ -49,6 +49,9 @@ export const updateProgressionStep = (progressionId: number, stepId: number, ste
 export const removeProgressionStep = (progressionId: number, stepId: number) =>
   api.delete(`/progressions/${progressionId}/steps/${stepId}`);
 
+export const reorderProgressionSteps = (progressionId: number, stepIds: number[]) =>
+  api.post(`/progressions/${progressionId}/steps/reorder`, { step_ids: stepIds });
+
 // Verse Texts
 export interface VerseTextResponse {
   version: string;
