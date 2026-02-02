@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getBibleBooks, getCategories, getVerse, createVerse, updateVerse } from '../api/client';
+import { getBibleBooks, getCategories, getVerse, createVerse, updateVerse, fetchAllVerseTexts } from '../api/client';
 import type { BibleBook, Category } from '../types';
 import BookAutocomplete from '../components/BookAutocomplete';
 import CategoryTag from '../components/CategoryTag';
@@ -15,6 +15,7 @@ export default function VerseForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [selectedBook, setSelectedBook] = useState<BibleBook | null>(null);
   const [chapter, setChapter] = useState('');
@@ -81,19 +82,31 @@ export default function VerseForm() {
 
       if (isEdit && id) {
         await updateVerse(parseInt(id), data);
+        // Auto-fetch verse texts after update
+        fetchAllVerseTexts(parseInt(id)).catch(() => {});
         navigate(`/verses/${id}`);
       } else {
         const res = await createVerse(data);
-        // Reset form for continuous entry
-        setChapter('');
-        setVerseStart('');
-        setVerseEnd('');
-        setNotes('');
-        // Keep categories and working book
+        const newVerseId = res.data.id;
+        const newReference = res.data.reference;
+
+        // Auto-fetch verse texts in background
+        fetchAllVerseTexts(newVerseId).catch(() => {});
+
         if (workingBook) {
+          // Stay on form for continuous entry
+          setChapter('');
+          setVerseStart('');
+          setVerseEnd('');
+          setNotes('');
           setSelectedBook(workingBook);
+          setSuccessMessage(`Added ${newReference} - ready for next verse`);
+          // Clear success message after 3 seconds
+          setTimeout(() => setSuccessMessage(null), 3000);
+        } else {
+          // Navigate to the new verse
+          navigate(`/verses/${newVerseId}`);
         }
-        navigate(`/verses/${res.data.id}`);
       }
     } catch (err: any) {
       setError(err.response?.data?.errors?.join(', ') || 'An error occurred');
@@ -114,6 +127,10 @@ export default function VerseForm() {
 
       {error && (
         <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">{error}</div>
+      )}
+
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md">{successMessage}</div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow">
