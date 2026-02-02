@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getProgression, deleteProgression, getVerseText } from '../api/client';
-import type { VerseProgression } from '../types';
+import { getProgression, deleteProgression, getVerseText, getVerse } from '../api/client';
+import type { VerseProgression, Verse } from '../types';
 
 const VERSIONS = [
   { id: 'en-bsb', name: 'Berean Study Bible' },
@@ -19,6 +19,8 @@ export default function ProgressionDetail() {
   const [selectedVersion, setSelectedVersion] = useState('en-bsb');
   const [verseTexts, setVerseTexts] = useState<Record<number, string>>({});
   const [loadingTexts, setLoadingTexts] = useState(false);
+  const [verseDetails, setVerseDetails] = useState<Record<number, Verse>>({});
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -52,6 +54,28 @@ export default function ProgressionDetail() {
 
     fetchTexts();
   }, [progression, selectedVersion]);
+
+  // Fetch verse details (notes, references) when progression loads
+  useEffect(() => {
+    if (!progression || progression.steps.length === 0) return;
+
+    const fetchDetails = async () => {
+      const details: Record<number, Verse> = {};
+
+      for (const step of progression.steps) {
+        try {
+          const res = await getVerse(step.verse.id);
+          details[step.verse.id] = res.data;
+        } catch {
+          // Skip if fetch fails
+        }
+      }
+
+      setVerseDetails(details);
+    };
+
+    fetchDetails();
+  }, [progression]);
 
   const handleDelete = async () => {
     if (!progression) return;
@@ -142,11 +166,51 @@ export default function ProgressionDetail() {
             <div className="absolute left-4 top-8 bottom-8 w-0.5 bg-blue-200" />
 
             <div className="space-y-4">
-              {progression.steps.map((step, index) => (
+              {progression.steps.map((step, index) => {
+                const details = verseDetails[step.verse.id];
+                const hasNotes = details?.notes;
+                const hasReferences = details?.referenced_verses && details.referenced_verses.length > 0;
+                const hasTooltipContent = hasNotes || hasReferences;
+
+                return (
                 <div key={step.id} className="relative flex items-start gap-4">
-                  {/* Step number circle */}
-                  <div className="relative z-10 w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-full text-sm font-medium shrink-0">
-                    {index + 1}
+                  {/* Step number circle with tooltip */}
+                  <div
+                    className="relative z-10"
+                    onMouseEnter={() => setHoveredStep(step.verse.id)}
+                    onMouseLeave={() => setHoveredStep(null)}
+                  >
+                    <div className={`w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-full text-sm font-medium shrink-0 ${hasTooltipContent ? 'cursor-help ring-2 ring-blue-300' : ''}`}>
+                      {index + 1}
+                    </div>
+
+                    {/* Tooltip */}
+                    {hoveredStep === step.verse.id && hasTooltipContent && (
+                      <div className="absolute left-10 top-0 z-20 w-64 bg-slate-800 text-white text-sm rounded-lg shadow-lg p-3">
+                        {/* Arrow */}
+                        <div className="absolute left-0 top-3 -translate-x-full border-8 border-transparent border-r-slate-800" />
+
+                        {hasNotes && (
+                          <div className="mb-2">
+                            <p className="text-blue-300 font-medium text-xs uppercase mb-1">Notes</p>
+                            <p className="text-gray-200">{details.notes}</p>
+                          </div>
+                        )}
+
+                        {hasReferences && (
+                          <div>
+                            <p className="text-blue-300 font-medium text-xs uppercase mb-1">Cross-References</p>
+                            <ul className="space-y-1">
+                              {details.referenced_verses?.map((ref) => (
+                                <li key={ref.id} className="text-gray-200">
+                                  {ref.reference}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Step content */}
@@ -182,7 +246,8 @@ export default function ProgressionDetail() {
                     )}
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           </div>
         )}
