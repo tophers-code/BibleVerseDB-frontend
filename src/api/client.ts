@@ -78,4 +78,7 @@ export const getVerseText = (verseId: number, version: string) =>
 export const fetchAllVerseTexts = (verseId: number) =>
   api.post<FetchTextsResponse>(`/verses/${verseId}/fetch_texts`);
 
+export const deleteVerseText = (verseId: number, version: string) =>
+  api.delete(`/verses/${verseId}/texts/${version}`);
+
 export default api;
