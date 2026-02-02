@@ -6,6 +6,7 @@ import CategoryTag from '../components/CategoryTag';
 
 const VERSION_NAMES: Record<string, string> = {
   'esv': 'English Standard Version',
+  'nlt': 'New Living Translation',
   'en-asv': 'American Standard Version',
   'en-t4t': 'Translation for Translators',
   'en-bsb': 'Berean Study Bible',
