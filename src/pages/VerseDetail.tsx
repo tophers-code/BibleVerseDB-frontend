@@ -5,6 +5,7 @@ import type { Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
 
 const VERSION_NAMES: Record<string, string> = {
+  'esv': 'English Standard Version',
   'en-asv': 'American Standard Version',
   'en-t4t': 'Translation for Translators',
   'en-bsb': 'Berean Study Bible',
@@ -23,7 +24,7 @@ export default function VerseDetail() {
   const [error, setError] = useState<string | null>(null);
   const [verseTexts, setVerseTexts] = useState<VerseTextResponse[]>([]);
   const [fetchingTexts, setFetchingTexts] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState<string>('en-bsb');
+  const [selectedVersion, setSelectedVersion] = useState<string>('esv');
 
   useEffect(() => {
     if (id) {

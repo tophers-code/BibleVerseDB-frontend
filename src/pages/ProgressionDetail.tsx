@@ -4,6 +4,7 @@ import { getProgression, deleteProgression, getVerseText, getVerse } from '../ap
 import type { VerseProgression, Verse } from '../types';
 
 const VERSIONS = [
+  { id: 'esv', name: 'English Standard Version' },
   { id: 'en-bsb', name: 'Berean Study Bible' },
   { id: 'en-asv', name: 'American Standard Version' },
   { id: 'en-web', name: 'World English Bible' },
@@ -16,7 +17,7 @@ export default function ProgressionDetail() {
   const [progression, setProgression] = useState<VerseProgression | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState('en-bsb');
+  const [selectedVersion, setSelectedVersion] = useState('esv');
   const [verseTexts, setVerseTexts] = useState<Record<number, string>>({});
   const [loadingTexts, setLoadingTexts] = useState(false);
   const [verseDetails, setVerseDetails] = useState<Record<number, Verse>>({});
