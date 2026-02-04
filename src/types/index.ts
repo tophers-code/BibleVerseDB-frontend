@@ -75,7 +75,8 @@ export type ColorCode =
   | 'red'
   | 'green'
   | 'light-green'
-  | 'brown';
+  | 'brown'
+  | 'light-orange';
 
 export const categoryColors: Record<ColorCode, string> = {
   'yellow': 'bg-amber-400 text-black',
@@ -91,4 +92,5 @@ export const categoryColors: Record<ColorCode, string> = {
   'green': 'bg-green-500 text-white',
   'light-green': 'bg-green-300 text-black',
   'brown': 'bg-amber-800 text-white',
+  'light-orange': 'bg-orange-300 text-black',
 };
