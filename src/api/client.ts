@@ -9,11 +9,13 @@ const api = axios.create({
 });
 
 // Bible Books
-export const getBibleBooks = () => api.get<BibleBook[]>('/bible_books');
+export const getBibleBooks = (params?: { with_verses?: boolean; category_id?: number }) =>
+  api.get<BibleBook[]>('/bible_books', { params });
 export const getBibleBook = (id: number) => api.get<BibleBook>(`/bible_books/${id}`);
 
 // Categories
-export const getCategories = () => api.get<Category[]>('/categories');
+export const getCategories = (params?: { with_verses?: boolean; bible_book_id?: number }) =>
+  api.get<Category[]>('/categories', { params });
 export const getCategory = (id: number) => api.get<Category>(`/categories/${id}`);
 export const createCategory = (data: { name: string; meaning: string; color_code: string }) =>
   api.post<Category>('/categories', { category: data });

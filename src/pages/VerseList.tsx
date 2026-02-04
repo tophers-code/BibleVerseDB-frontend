@@ -14,13 +14,39 @@ export default function VerseList() {
   const categoryFilter = searchParams.get('category_id');
   const bookFilter = searchParams.get('bible_book_id');
 
+  // Fetch available categories based on current book filter
   useEffect(() => {
-    Promise.all([getCategories(), getBibleBooks()]).then(([catRes, bookRes]) => {
-      setCategories(catRes.data);
-      setBooks(bookRes.data);
+    const params: { with_verses: boolean; bible_book_id?: number } = { with_verses: true };
+    if (bookFilter) {
+      params.bible_book_id = parseInt(bookFilter);
+    }
+    getCategories(params).then((res) => {
+      setCategories(res.data);
+      // Clear category filter if current selection is no longer valid
+      if (categoryFilter && !res.data.some((c) => c.id === parseInt(categoryFilter))) {
+        searchParams.delete('category_id');
+        setSearchParams(searchParams);
+      }
     });
-  }, []);
+  }, [bookFilter]);
 
+  // Fetch available books based on current category filter
+  useEffect(() => {
+    const params: { with_verses: boolean; category_id?: number } = { with_verses: true };
+    if (categoryFilter) {
+      params.category_id = parseInt(categoryFilter);
+    }
+    getBibleBooks(params).then((res) => {
+      setBooks(res.data);
+      // Clear book filter if current selection is no longer valid
+      if (bookFilter && !res.data.some((b) => b.id === parseInt(bookFilter))) {
+        searchParams.delete('bible_book_id');
+        setSearchParams(searchParams);
+      }
+    });
+  }, [categoryFilter]);
+
+  // Fetch verses based on both filters
   useEffect(() => {
     setLoading(true);
     const params: { category_id?: number; bible_book_id?: number } = {};
