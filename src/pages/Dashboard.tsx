@@ -13,7 +13,11 @@ export default function Dashboard() {
     Promise.all([getCategories(), getVerses()])
       .then(([catRes, verseRes]) => {
         setCategories(catRes.data);
-        setRecentVerses(verseRes.data.slice(0, 5));
+        // Sort by created_at descending (newest first) and take the first 5
+        const sortedVerses = [...verseRes.data].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        setRecentVerses(sortedVerses.slice(0, 5));
       })
       .finally(() => setLoading(false));
   }, []);
