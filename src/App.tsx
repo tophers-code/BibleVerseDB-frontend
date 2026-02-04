@@ -6,6 +6,7 @@ import VerseForm from './pages/VerseForm';
 import VerseDetail from './pages/VerseDetail';
 import CategoryList from './pages/CategoryList';
 import CategoryDetail from './pages/CategoryDetail';
+import CategoryForm from './pages/CategoryForm';
 import BookList from './pages/BookList';
 import ProgressionList from './pages/ProgressionList';
 import ProgressionForm from './pages/ProgressionForm';
@@ -22,7 +23,9 @@ function App() {
           <Route path="verses/:id" element={<VerseDetail />} />
           <Route path="verses/:id/edit" element={<VerseForm />} />
           <Route path="categories" element={<CategoryList />} />
+          <Route path="categories/new" element={<CategoryForm />} />
           <Route path="categories/:id" element={<CategoryDetail />} />
+          <Route path="categories/:id/edit" element={<CategoryForm />} />
           <Route path="books" element={<BookList />} />
           <Route path="progressions" element={<ProgressionList />} />
           <Route path="progressions/new" element={<ProgressionForm />} />

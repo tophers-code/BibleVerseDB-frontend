@@ -14,6 +14,7 @@ export interface Category {
   name: string;
   meaning: string;
   color_code: string;
+  verses_count?: number;
   created_at: string;
   updated_at: string;
 }
