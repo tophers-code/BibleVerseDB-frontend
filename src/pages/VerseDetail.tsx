@@ -242,17 +242,22 @@ export default function VerseDetail() {
 
         <div className="mb-6">
           <h2 className="text-sm font-medium text-gray-700 mb-2">Categories</h2>
-          <div className="flex flex-wrap gap-2">
-            {verse.categories.length > 0 ? (
-              verse.categories.map((category) => (
-                <Link key={category.id} to={`/categories/${category.id}`}>
-                  <CategoryTag category={category} />
-                </Link>
-              ))
-            ) : (
-              <span className="text-gray-500 text-sm">No categories assigned</span>
-            )}
-          </div>
+          {verse.categories.length > 0 ? (
+            <div className="space-y-2">
+              {verse.categories.map((category) => (
+                <div key={category.id} className="flex items-start gap-2">
+                  <Link to={`/categories/${category.id}`}>
+                    <CategoryTag category={category} showTooltip={false} />
+                  </Link>
+                  {category.category_note && (
+                    <span className="text-sm text-gray-600 italic">— {category.category_note}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <span className="text-gray-500 text-sm">No categories assigned</span>
+          )}
         </div>
 
         {verse.notes && (

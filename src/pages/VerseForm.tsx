@@ -23,6 +23,7 @@ export default function VerseForm() {
   const [verseEnd, setVerseEnd] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [categoryNotes, setCategoryNotes] = useState<Record<number, string>>({});
 
   // Working book for continuous entry
   const [workingBook, setWorkingBook] = useState<BibleBook | null>(null);
@@ -47,17 +48,38 @@ export default function VerseForm() {
           setVerseEnd(verse.verse_end?.toString() || '');
           setNotes(verse.notes || '');
           setSelectedCategories(verse.categories.map((c) => c.id));
+          // Load category notes
+          const notes: Record<number, string> = {};
+          verse.categories.forEach((c) => {
+            if (c.category_note) {
+              notes[c.id] = c.category_note;
+            }
+          });
+          setCategoryNotes(notes);
         })
         .finally(() => setLoading(false));
     }
   }, [id, isEdit]);
 
   const handleCategoryToggle = (categoryId: number) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
-    );
+    setSelectedCategories((prev) => {
+      if (prev.includes(categoryId)) {
+        // Remove category and its notes
+        setCategoryNotes((notes) => {
+          const { [categoryId]: _, ...rest } = notes;
+          return rest;
+        });
+        return prev.filter((id) => id !== categoryId);
+      }
+      return [...prev, categoryId];
+    });
+  };
+
+  const handleCategoryNoteChange = (categoryId: number, note: string) => {
+    setCategoryNotes((prev) => ({
+      ...prev,
+      [categoryId]: note,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,6 +100,7 @@ export default function VerseForm() {
         verse_end: verseEnd ? parseInt(verseEnd) : null,
         notes: notes || undefined,
         category_ids: selectedCategories,
+        category_notes: categoryNotes,
       };
 
       if (isEdit && id) {
@@ -99,6 +122,8 @@ export default function VerseForm() {
           setVerseStart('');
           setVerseEnd('');
           setNotes('');
+          setSelectedCategories([]);
+          setCategoryNotes({});
           setSelectedBook(workingBook);
           setSuccessMessage(`Added ${newReference} - ready for next verse`);
           // Clear success message after 3 seconds
@@ -211,7 +236,8 @@ export default function VerseForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Categories</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Categories</label>
+          <p className="text-xs text-gray-500 mb-2">Click to select multiple categories</p>
           <div className="flex flex-wrap gap-2">
             {categories.map((category) => (
               <CategoryTag
@@ -219,18 +245,43 @@ export default function VerseForm() {
                 category={category}
                 onClick={() => handleCategoryToggle(category.id)}
                 selected={selectedCategories.includes(category.id)}
+                showTooltip={false}
               />
             ))}
           </div>
+
+          {/* Per-category notes */}
+          {selectedCategories.length > 0 && (
+            <div className="mt-4 space-y-3">
+              <p className="text-sm font-medium text-gray-700">Category Notes</p>
+              {selectedCategories.map((catId) => {
+                const category = categories.find((c) => c.id === catId);
+                if (!category) return null;
+                return (
+                  <div key={catId} className="flex gap-2 items-start">
+                    <CategoryTag category={category} showTooltip={false} />
+                    <input
+                      type="text"
+                      value={categoryNotes[catId] || ''}
+                      onChange={(e) => handleCategoryNoteChange(catId, e.target.value)}
+                      placeholder={`Why does this verse relate to ${category.name}?`}
+                      className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">General Notes</label>
           <textarea
             value={notes}
+            onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            placeholder="Add personal notes..."
+            placeholder="Add personal notes (applies to the whole verse)..."
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

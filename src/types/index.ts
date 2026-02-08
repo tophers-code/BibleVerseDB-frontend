@@ -15,8 +15,9 @@ export interface Category {
   meaning: string;
   color_code: string;
   verses_count?: number;
-  created_at: string;
-  updated_at: string;
+  category_note?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Verse {
@@ -61,6 +62,7 @@ export interface VerseFormData {
   verse_end?: number | null;
   notes?: string;
   category_ids?: number[];
+  category_notes?: Record<number, string>;
 }
 
 export type ColorCode =
