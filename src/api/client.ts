@@ -28,9 +28,9 @@ export const getVerses = (params?: { bible_book_id?: number; category_id?: numbe
   api.get<Verse[]>('/verses', { params });
 export const getVerse = (id: number) => api.get<Verse>(`/verses/${id}`);
 export const createVerse = (data: VerseFormData) =>
-  api.post<Verse>('/verses', { verse: data, category_ids: data.category_ids, category_notes: data.category_notes });
+  api.post<Verse>('/verses', { verse: data, category_ids: data.category_ids, category_notes: data.category_notes, category_prominent: data.category_prominent });
 export const updateVerse = (id: number, data: Partial<VerseFormData>) =>
-  api.patch<Verse>(`/verses/${id}`, { verse: data, category_ids: data.category_ids, category_notes: data.category_notes });
+  api.patch<Verse>(`/verses/${id}`, { verse: data, category_ids: data.category_ids, category_notes: data.category_notes, category_prominent: data.category_prominent });
 export const deleteVerse = (id: number) => api.delete(`/verses/${id}`);
 
 // Verse References

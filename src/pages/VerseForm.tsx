@@ -24,6 +24,7 @@ export default function VerseForm() {
   const [notes, setNotes] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [categoryNotes, setCategoryNotes] = useState<Record<number, string>>({});
+  const [categoryProminent, setCategoryProminent] = useState<Record<number, boolean>>({});
 
   // Working book for continuous entry
   const [workingBook, setWorkingBook] = useState<BibleBook | null>(null);
@@ -48,14 +49,19 @@ export default function VerseForm() {
           setVerseEnd(verse.verse_end?.toString() || '');
           setNotes(verse.notes || '');
           setSelectedCategories(verse.categories.map((c) => c.id));
-          // Load category notes
+          // Load category notes and prominent flags
           const notes: Record<number, string> = {};
+          const prominent: Record<number, boolean> = {};
           verse.categories.forEach((c) => {
             if (c.category_note) {
               notes[c.id] = c.category_note;
             }
+            if (c.prominent) {
+              prominent[c.id] = true;
+            }
           });
           setCategoryNotes(notes);
+          setCategoryProminent(prominent);
         })
         .finally(() => setLoading(false));
     }
@@ -64,9 +70,13 @@ export default function VerseForm() {
   const handleCategoryToggle = (categoryId: number) => {
     setSelectedCategories((prev) => {
       if (prev.includes(categoryId)) {
-        // Remove category and its notes
+        // Remove category, its notes, and prominent flag
         setCategoryNotes((notes) => {
           const { [categoryId]: _, ...rest } = notes;
+          return rest;
+        });
+        setCategoryProminent((prominent) => {
+          const { [categoryId]: _, ...rest } = prominent;
           return rest;
         });
         return prev.filter((id) => id !== categoryId);
@@ -79,6 +89,13 @@ export default function VerseForm() {
     setCategoryNotes((prev) => ({
       ...prev,
       [categoryId]: note,
+    }));
+  };
+
+  const handleProminentToggle = (categoryId: number) => {
+    setCategoryProminent((prev) => ({
+      ...prev,
+      [categoryId]: !prev[categoryId],
     }));
   };
 
@@ -101,6 +118,7 @@ export default function VerseForm() {
         notes: notes || undefined,
         category_ids: selectedCategories,
         category_notes: categoryNotes,
+        category_prominent: categoryProminent,
       };
 
       if (isEdit && id) {
@@ -124,6 +142,7 @@ export default function VerseForm() {
           setNotes('');
           setSelectedCategories([]);
           setCategoryNotes({});
+          setCategoryProminent({});
           setSelectedBook(workingBook);
           setSuccessMessage(`Added ${newReference} - ready for next verse`);
           // Clear success message after 3 seconds
@@ -250,15 +269,30 @@ export default function VerseForm() {
             ))}
           </div>
 
-          {/* Per-category notes */}
+          {/* Per-category notes and prominent toggle */}
           {selectedCategories.length > 0 && (
             <div className="mt-4 space-y-3">
-              <p className="text-sm font-medium text-gray-700">Category Notes</p>
+              <p className="text-sm font-medium text-gray-700">Category Notes & Prominence</p>
               {selectedCategories.map((catId) => {
                 const category = categories.find((c) => c.id === catId);
                 if (!category) return null;
+                const isProminent = categoryProminent[catId] || false;
                 return (
                   <div key={catId} className="flex gap-2 items-start">
+                    <button
+                      type="button"
+                      onClick={() => handleProminentToggle(catId)}
+                      className={`p-1.5 rounded transition-colors ${
+                        isProminent
+                          ? 'text-yellow-500 hover:text-yellow-600'
+                          : 'text-gray-300 hover:text-yellow-400'
+                      }`}
+                      title={isProminent ? 'Remove prominent marker' : 'Mark as prominent verse for this category'}
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </button>
                     <CategoryTag category={category} showTooltip={false} />
                     <input
                       type="text"
