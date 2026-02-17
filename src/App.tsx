@@ -11,6 +11,7 @@ import BookList from './pages/BookList';
 import ProgressionList from './pages/ProgressionList';
 import ProgressionForm from './pages/ProgressionForm';
 import ProgressionDetail from './pages/ProgressionDetail';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="progressions/new" element={<ProgressionForm />} />
           <Route path="progressions/:id" element={<ProgressionDetail />} />
           <Route path="progressions/:id/edit" element={<ProgressionForm />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>

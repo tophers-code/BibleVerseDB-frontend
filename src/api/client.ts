@@ -88,4 +88,41 @@ export const fetchAllVerseTexts = (verseId: number) =>
 export const deleteVerseText = (verseId: number, version: string) =>
   api.delete(`/verses/${verseId}/texts/${version}`);
 
+// Verse Text Status & Batch Fetch
+export interface VersionStatus {
+  code: string;
+  name: string;
+  missing_count: number;
+  fetched_count: number;
+}
+
+export interface ProviderStatus {
+  name: string;
+  versions: VersionStatus[];
+}
+
+export interface VerseTextStatusResponse {
+  total_verses: number;
+  providers: ProviderStatus[];
+}
+
+export interface BatchFetchResult {
+  verse_id: number;
+  reference: string;
+  status: 'success' | 'error';
+  text?: string;
+  error?: string;
+}
+
+export interface BatchFetchResponse {
+  version: string;
+  results: BatchFetchResult[];
+}
+
+export const getVerseTextStatus = () =>
+  api.get<VerseTextStatusResponse>('/verse_texts/status');
+
+export const batchFetchVerseTexts = (version: string) =>
+  api.post<BatchFetchResponse>('/verse_texts/batch_fetch', { version });
+
 export default api;

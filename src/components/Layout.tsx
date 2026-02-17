@@ -7,6 +7,7 @@ const navItems = [
   { path: '/categories', label: 'Categories' },
   { path: '/books', label: 'Books' },
   { path: '/progressions', label: 'Progressions' },
+  { path: '/settings', label: 'Settings' },
 ];
 
 export default function Layout() {
