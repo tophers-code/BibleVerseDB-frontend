@@ -265,6 +265,7 @@ export default function VerseForm() {
                 onClick={() => handleCategoryToggle(category.id)}
                 selected={selectedCategories.includes(category.id)}
                 showTooltip={false}
+                showMeaning={true}
               />
             ))}
           </div>

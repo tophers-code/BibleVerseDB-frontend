@@ -7,12 +7,14 @@ interface CategoryTagProps {
   onClick?: () => void;
   selected?: boolean;
   showTooltip?: boolean;
+  showMeaning?: boolean;
 }
 
-export default function CategoryTag({ category, onClick, selected, showTooltip = true }: CategoryTagProps) {
+export default function CategoryTag({ category, onClick, selected, showTooltip = true, showMeaning = false }: CategoryTagProps) {
   const [isHovered, setIsHovered] = useState(false);
   const colorClass = categoryColors[category.color_code as ColorCode] || 'bg-gray-500 text-white';
   const hasNote = category.category_note && showTooltip;
+  const hasMeaning = showMeaning && category.meaning;
 
   return (
     <span
@@ -39,10 +41,17 @@ export default function CategoryTag({ category, onClick, selected, showTooltip =
         )}
       </span>
 
-      {/* Tooltip */}
+      {/* Tooltip for category note */}
       {hasNote && isHovered && (
         <span className="absolute z-50 left-0 top-full mt-1 px-2 py-1 text-xs text-white bg-slate-800 rounded shadow-lg min-w-48 max-w-xs">
           {category.category_note}
+        </span>
+      )}
+
+      {/* Tooltip for category meaning */}
+      {hasMeaning && !hasNote && isHovered && (
+        <span className="absolute z-50 left-0 top-full mt-1 px-2 py-1 text-xs text-white bg-slate-800 rounded shadow-lg min-w-32 max-w-xs">
+          {category.meaning}
         </span>
       )}
     </span>
