@@ -26,6 +26,12 @@ export const deleteCategory = (id: number) => api.delete(`/categories/${id}`);
 // Tags
 export const getTags = (params?: { with_verses?: boolean; bible_book_id?: number; category_id?: number }) =>
   api.get<Tag[]>('/tags', { params });
+export const getTag = (id: number) => api.get<Tag>(`/tags/${id}`);
+export const createTag = (data: { name: string; description?: string }) =>
+  api.post<Tag>('/tags', { tag: data });
+export const updateTag = (id: number, data: { name?: string; description?: string }) =>
+  api.patch<Tag>(`/tags/${id}`, { tag: data });
+export const deleteTag = (id: number) => api.delete(`/tags/${id}`);
 
 // Verses
 export const getVerses = (params?: { bible_book_id?: number; category_id?: number; tag_id?: number }) =>

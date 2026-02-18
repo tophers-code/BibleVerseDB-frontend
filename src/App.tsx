@@ -11,6 +11,9 @@ import BookList from './pages/BookList';
 import ProgressionList from './pages/ProgressionList';
 import ProgressionForm from './pages/ProgressionForm';
 import ProgressionDetail from './pages/ProgressionDetail';
+import TagList from './pages/TagList';
+import TagDetail from './pages/TagDetail';
+import TagForm from './pages/TagForm';
 import Settings from './pages/Settings';
 
 function App() {
@@ -27,6 +30,10 @@ function App() {
           <Route path="categories/new" element={<CategoryForm />} />
           <Route path="categories/:id" element={<CategoryDetail />} />
           <Route path="categories/:id/edit" element={<CategoryForm />} />
+          <Route path="tags" element={<TagList />} />
+          <Route path="tags/new" element={<TagForm />} />
+          <Route path="tags/:id" element={<TagDetail />} />
+          <Route path="tags/:id/edit" element={<TagForm />} />
           <Route path="books" element={<BookList />} />
           <Route path="progressions" element={<ProgressionList />} />
           <Route path="progressions/new" element={<ProgressionForm />} />

@@ -5,6 +5,7 @@ const navItems = [
   { path: '/verses', label: 'Verses' },
   { path: '/verses/new', label: 'Add Verse' },
   { path: '/categories', label: 'Categories' },
+  { path: '/tags', label: 'Tags' },
   { path: '/books', label: 'Books' },
   { path: '/progressions', label: 'Progressions' },
   { path: '/settings', label: 'Settings' },
