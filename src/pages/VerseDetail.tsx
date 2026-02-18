@@ -3,22 +3,13 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getVerse, deleteVerse, getVerses, addVerseReference, removeVerseReference, getVerseTexts, fetchAllVerseTexts, getVerseText, deleteVerseText, type VerseTextResponse } from '../api/client';
 import type { Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
-
-const VERSIONS = [
-  { id: 'esv', name: 'English Standard Version' },
-  { id: 'nlt', name: 'New Living Translation' },
-  { id: 'niv', name: 'New International Version' },
-  { id: 'nasb', name: 'New American Standard Bible' },
-  { id: 'csb', name: 'Christian Standard Bible' },
-  { id: 'en-bsb', name: 'Berean Study Bible' },
-  { id: 'en-asv', name: 'American Standard Version' },
-  { id: 'en-web', name: 'World English Bible' },
-  { id: 'en-t4t', name: 'Translation for Translators' },
-];
+import { VERSIONS } from '../constants';
+import { usePreferredVersion } from '../contexts/PreferredVersionContext';
 
 export default function VerseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { preferredVersion } = usePreferredVersion();
   const [verse, setVerse] = useState<Verse | null>(null);
   const [allVerses, setAllVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +19,7 @@ export default function VerseDetail() {
   const [error, setError] = useState<string | null>(null);
   const [verseTexts, setVerseTexts] = useState<VerseTextResponse[]>([]);
   const [fetchingTexts, setFetchingTexts] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState<string>('esv');
+  const [selectedVersion, setSelectedVersion] = useState<string>(preferredVersion);
   const [refreshingVersion, setRefreshingVersion] = useState<string | null>(null);
 
   useEffect(() => {

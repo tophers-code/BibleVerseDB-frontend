@@ -2,18 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProgression, deleteProgression, getVerseText, getVerse } from '../api/client';
 import type { VerseProgression, Verse } from '../types';
-
-const VERSIONS = [
-  { id: 'esv', name: 'English Standard Version' },
-  { id: 'nlt', name: 'New Living Translation' },
-  { id: 'niv', name: 'New International Version' },
-  { id: 'nasb', name: 'New American Standard Bible' },
-  { id: 'csb', name: 'Christian Standard Bible' },
-  { id: 'en-bsb', name: 'Berean Study Bible' },
-  { id: 'en-asv', name: 'American Standard Version' },
-  { id: 'en-web', name: 'World English Bible' },
-  { id: 'en-t4t', name: 'Translation for Translators' },
-];
+import { VERSIONS } from '../constants';
+import { usePreferredVersion } from '../contexts/PreferredVersionContext';
 
 export default function ProgressionDetail() {
   const { id } = useParams();
@@ -21,7 +11,8 @@ export default function ProgressionDetail() {
   const [progression, setProgression] = useState<VerseProgression | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState('esv');
+  const { preferredVersion } = usePreferredVersion();
+  const [selectedVersion, setSelectedVersion] = useState(preferredVersion);
   const [verseTexts, setVerseTexts] = useState<Record<number, string>>({});
   const [loadingTexts, setLoadingTexts] = useState(false);
   const [verseDetails, setVerseDetails] = useState<Record<number, Verse>>({});

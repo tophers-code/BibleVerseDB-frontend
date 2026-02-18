@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { getVerseTextStatus, batchFetchVerseTexts } from '../api/client';
 import type { ProviderStatus } from '../api/client';
+import { VERSIONS } from '../constants';
+import { usePreferredVersion } from '../contexts/PreferredVersionContext';
 
 export default function Settings() {
+  const { preferredVersion, setPreferredVersion } = usePreferredVersion();
   const [providers, setProviders] = useState<ProviderStatus[]>([]);
   const [totalVerses, setTotalVerses] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -42,6 +45,22 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-800">Settings</h1>
+
+      <div className="bg-white rounded-lg shadow-md p-5">
+        <h2 className="text-lg font-semibold text-slate-700 mb-3">Default Translation</h2>
+        <p className="text-sm text-gray-500 mb-3">
+          This translation will be shown by default on verse and progression pages.
+        </p>
+        <select
+          value={preferredVersion}
+          onChange={(e) => setPreferredVersion(e.target.value)}
+          className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {VERSIONS.map((v) => (
+            <option key={v.id} value={v.id}>{v.name}</option>
+          ))}
+        </select>
+      </div>
 
       <div>
         <h2 className="text-lg font-semibold text-slate-700 mb-4">

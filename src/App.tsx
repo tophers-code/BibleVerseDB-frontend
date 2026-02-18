@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { PreferredVersionProvider } from './contexts/PreferredVersionContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import VerseList from './pages/VerseList';
@@ -18,6 +19,7 @@ import Settings from './pages/Settings';
 
 function App() {
   return (
+    <PreferredVersionProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -43,6 +45,7 @@ function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </PreferredVersionProvider>
   );
 }
 
