@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getVerse, deleteVerse, getVerses, addVerseReference, removeVerseReference, getVerseTexts, fetchAllVerseTexts, getVerseText, deleteVerseText, type VerseTextResponse } from '../api/client';
 import type { Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
+import Markdown from '../components/Markdown';
 import { VERSIONS } from '../constants';
 import { usePreferredVersion } from '../contexts/PreferredVersionContext';
 
@@ -278,7 +279,7 @@ export default function VerseDetail() {
         {verse.notes && (
           <div className="mb-6">
             <h2 className="text-sm font-medium text-gray-700 mb-2">Notes</h2>
-            <p className="text-gray-600 whitespace-pre-wrap">{verse.notes}</p>
+            <Markdown>{verse.notes}</Markdown>
           </div>
         )}
 

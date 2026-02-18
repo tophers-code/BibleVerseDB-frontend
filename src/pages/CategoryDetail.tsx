@@ -4,6 +4,7 @@ import { getCategory, getVerses, deleteCategory } from '../api/client';
 import type { Category, Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
 import VerseCard from '../components/VerseCard';
+import Markdown from '../components/Markdown';
 
 export default function CategoryDetail() {
   const { id } = useParams();
@@ -105,7 +106,7 @@ export default function CategoryDetail() {
         {category.description && (
           <div className="mt-4">
             <h2 className="text-sm font-medium text-gray-700 mb-1">Description</h2>
-            <p className="text-gray-600 whitespace-pre-wrap">{category.description}</p>
+            <Markdown>{category.description}</Markdown>
           </div>
         )}
         {error && (

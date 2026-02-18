@@ -114,6 +114,7 @@ export default function CategoryForm() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Description
+            <span className="ml-2 text-xs font-normal text-gray-400">Supports Markdown</span>
           </label>
           <textarea
             value={description}

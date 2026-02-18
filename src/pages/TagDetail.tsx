@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getTag, getVerses, deleteTag } from '../api/client';
 import type { Tag, Verse } from '../types';
 import VerseCard from '../components/VerseCard';
+import Markdown from '../components/Markdown';
 
 export default function TagDetail() {
   const { id } = useParams();
@@ -82,7 +83,7 @@ export default function TagDetail() {
         {tag.description && (
           <div className="mt-4">
             <h2 className="text-sm font-medium text-gray-700 mb-1">Description</h2>
-            <p className="text-gray-600 whitespace-pre-wrap">{tag.description}</p>
+            <Markdown>{tag.description}</Markdown>
           </div>
         )}
         {error && (

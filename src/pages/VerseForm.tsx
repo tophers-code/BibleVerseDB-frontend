@@ -359,7 +359,10 @@ export default function VerseForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">General Notes</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            General Notes
+            <span className="ml-2 text-xs font-normal text-gray-400">Supports Markdown</span>
+          </label>
           <textarea
             value={notes}
             onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)}

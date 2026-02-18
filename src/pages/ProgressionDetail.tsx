@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProgression, deleteProgression, getVerseText, getVerse } from '../api/client';
 import type { VerseProgression, Verse } from '../types';
 import { VERSIONS } from '../constants';
+import Markdown from '../components/Markdown';
 import { usePreferredVersion } from '../contexts/PreferredVersionContext';
 
 export default function ProgressionDetail() {
@@ -106,7 +107,7 @@ export default function ProgressionDetail() {
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{progression.name}</h1>
           {progression.description && (
-            <p className="text-gray-600 mt-2">{progression.description}</p>
+            <Markdown className="mt-2">{progression.description}</Markdown>
           )}
         </div>
         <div className="flex gap-2">
