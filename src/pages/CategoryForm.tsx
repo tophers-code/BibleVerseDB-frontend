@@ -27,6 +27,7 @@ export default function CategoryForm() {
 
   const [name, setName] = useState('');
   const [meaning, setMeaning] = useState('');
+  const [description, setDescription] = useState('');
   const [colorCode, setColorCode] = useState<ColorCode>('blue');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,7 @@ export default function CategoryForm() {
         .then((res) => {
           setName(res.data.name);
           setMeaning(res.data.meaning);
+          setDescription(res.data.description || '');
           setColorCode(res.data.color_code as ColorCode);
         })
         .catch(() => setError('Failed to load category'))
@@ -52,10 +54,10 @@ export default function CategoryForm() {
 
     try {
       if (isEditing && id) {
-        await updateCategory(parseInt(id), { name, meaning, color_code: colorCode });
+        await updateCategory(parseInt(id), { name, meaning, description, color_code: colorCode });
         navigate(`/categories/${id}`);
       } else {
-        const res = await createCategory({ name, meaning, color_code: colorCode });
+        const res = await createCategory({ name, meaning, description, color_code: colorCode });
         navigate(`/categories/${res.data.id}`);
       }
     } catch (err: any) {
@@ -105,6 +107,19 @@ export default function CategoryForm() {
             onChange={(e) => setMeaning(e.target.value)}
             required
             placeholder="e.g., Study of Heaven"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={6}
+            placeholder="Long-form doctrinal description..."
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

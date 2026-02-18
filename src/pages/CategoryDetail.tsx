@@ -102,6 +102,12 @@ export default function CategoryDetail() {
             </button>
           </div>
         </div>
+        {category.description && (
+          <div className="mt-4">
+            <h2 className="text-sm font-medium text-gray-700 mb-1">Description</h2>
+            <p className="text-gray-600 whitespace-pre-wrap">{category.description}</p>
+          </div>
+        )}
         {error && (
           <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
             {error}

@@ -14,6 +14,7 @@ export interface Category {
   name: string;
   meaning: string;
   color_code: string;
+  description?: string;
   verses_count?: number;
   category_note?: string | null;
   prominent?: boolean;

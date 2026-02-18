@@ -17,9 +17,9 @@ export const getBibleBook = (id: number) => api.get<BibleBook>(`/bible_books/${i
 export const getCategories = (params?: { with_verses?: boolean; bible_book_id?: number }) =>
   api.get<Category[]>('/categories', { params });
 export const getCategory = (id: number) => api.get<Category>(`/categories/${id}`);
-export const createCategory = (data: { name: string; meaning: string; color_code: string }) =>
+export const createCategory = (data: { name: string; meaning: string; color_code: string; description?: string }) =>
   api.post<Category>('/categories', { category: data });
-export const updateCategory = (id: number, data: { name?: string; meaning?: string; color_code?: string }) =>
+export const updateCategory = (id: number, data: { name?: string; meaning?: string; color_code?: string; description?: string }) =>
   api.patch<Category>(`/categories/${id}`, { category: data });
 export const deleteCategory = (id: number) => api.delete(`/categories/${id}`);
 
