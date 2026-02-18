@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getVerses, getCategories, getBibleBooks, deleteVerse } from '../api/client';
-import type { Verse, Category, BibleBook } from '../types';
+import { getVerses, getCategories, getBibleBooks, getTags, deleteVerse } from '../api/client';
+import type { Verse, Category, BibleBook, Tag } from '../types';
 import VerseCard from '../components/VerseCard';
 
 export default function VerseList() {
@@ -9,12 +9,14 @@ export default function VerseList() {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [books, setBooks] = useState<BibleBook[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
 
   const categoryFilter = searchParams.get('category_id');
   const bookFilter = searchParams.get('bible_book_id');
+  const tagFilter = searchParams.get('tag_id');
 
-  // Fetch available categories based on current book filter
+  // Fetch available categories based on current filters
   useEffect(() => {
     const params: { with_verses: boolean; bible_book_id?: number } = { with_verses: true };
     if (bookFilter) {
@@ -22,7 +24,6 @@ export default function VerseList() {
     }
     getCategories(params).then((res) => {
       setCategories(res.data);
-      // Clear category filter if current selection is no longer valid
       if (categoryFilter && !res.data.some((c) => c.id === parseInt(categoryFilter))) {
         searchParams.delete('category_id');
         setSearchParams(searchParams);
@@ -30,7 +31,7 @@ export default function VerseList() {
     });
   }, [bookFilter]);
 
-  // Fetch available books based on current category filter
+  // Fetch available books based on current filters
   useEffect(() => {
     const params: { with_verses: boolean; category_id?: number } = { with_verses: true };
     if (categoryFilter) {
@@ -38,7 +39,6 @@ export default function VerseList() {
     }
     getBibleBooks(params).then((res) => {
       setBooks(res.data);
-      // Clear book filter if current selection is no longer valid
       if (bookFilter && !res.data.some((b) => b.id === parseInt(bookFilter))) {
         searchParams.delete('bible_book_id');
         setSearchParams(searchParams);
@@ -46,17 +46,32 @@ export default function VerseList() {
     });
   }, [categoryFilter]);
 
-  // Fetch verses based on both filters
+  // Fetch available tags based on current filters
+  useEffect(() => {
+    const params: { with_verses: boolean; bible_book_id?: number; category_id?: number } = { with_verses: true };
+    if (bookFilter) params.bible_book_id = parseInt(bookFilter);
+    if (categoryFilter) params.category_id = parseInt(categoryFilter);
+    getTags(params).then((res) => {
+      setTags(res.data);
+      if (tagFilter && !res.data.some((t) => t.id === parseInt(tagFilter))) {
+        searchParams.delete('tag_id');
+        setSearchParams(searchParams);
+      }
+    });
+  }, [bookFilter, categoryFilter]);
+
+  // Fetch verses based on all filters
   useEffect(() => {
     setLoading(true);
-    const params: { category_id?: number; bible_book_id?: number } = {};
+    const params: { category_id?: number; bible_book_id?: number; tag_id?: number } = {};
     if (categoryFilter) params.category_id = parseInt(categoryFilter);
     if (bookFilter) params.bible_book_id = parseInt(bookFilter);
+    if (tagFilter) params.tag_id = parseInt(tagFilter);
 
     getVerses(params)
       .then((res) => setVerses(res.data))
       .finally(() => setLoading(false));
-  }, [categoryFilter, bookFilter]);
+  }, [categoryFilter, bookFilter, tagFilter]);
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this verse?')) {
@@ -65,7 +80,7 @@ export default function VerseList() {
     }
   };
 
-  const handleFilterChange = (type: 'category_id' | 'bible_book_id', value: string) => {
+  const handleFilterChange = (type: 'category_id' | 'bible_book_id' | 'tag_id', value: string) => {
     if (value) {
       searchParams.set(type, value);
     } else {
@@ -74,7 +89,7 @@ export default function VerseList() {
     setSearchParams(searchParams);
   };
 
-  const hasFilters = categoryFilter || bookFilter;
+  const hasFilters = categoryFilter || bookFilter || tagFilter;
 
   return (
     <div className="space-y-6">
@@ -117,6 +132,24 @@ export default function VerseList() {
             {books.map((book) => (
               <option key={book.id} value={book.id}>
                 {book.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Filter by Tag
+          </label>
+          <select
+            value={tagFilter || ''}
+            onChange={(e) => handleFilterChange('tag_id', e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All Tags</option>
+            {tags.map((tag) => (
+              <option key={tag.id} value={tag.id}>
+                {tag.name}
               </option>
             ))}
           </select>

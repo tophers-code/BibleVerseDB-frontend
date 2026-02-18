@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { BibleBook, Category, Verse, VerseFormData, VerseProgression } from '../types';
+import type { BibleBook, Category, Tag, Verse, VerseFormData, VerseProgression } from '../types';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -23,14 +23,18 @@ export const updateCategory = (id: number, data: { name?: string; meaning?: stri
   api.patch<Category>(`/categories/${id}`, { category: data });
 export const deleteCategory = (id: number) => api.delete(`/categories/${id}`);
 
+// Tags
+export const getTags = (params?: { with_verses?: boolean; bible_book_id?: number; category_id?: number }) =>
+  api.get<Tag[]>('/tags', { params });
+
 // Verses
-export const getVerses = (params?: { bible_book_id?: number; category_id?: number }) =>
+export const getVerses = (params?: { bible_book_id?: number; category_id?: number; tag_id?: number }) =>
   api.get<Verse[]>('/verses', { params });
 export const getVerse = (id: number) => api.get<Verse>(`/verses/${id}`);
 export const createVerse = (data: VerseFormData) =>
-  api.post<Verse>('/verses', { verse: data, category_ids: data.category_ids, category_notes: data.category_notes, category_prominent: data.category_prominent });
+  api.post<Verse>('/verses', { verse: data, category_ids: data.category_ids, category_notes: data.category_notes, category_prominent: data.category_prominent, tag_names: data.tag_names });
 export const updateVerse = (id: number, data: Partial<VerseFormData>) =>
-  api.patch<Verse>(`/verses/${id}`, { verse: data, category_ids: data.category_ids, category_notes: data.category_notes, category_prominent: data.category_prominent });
+  api.patch<Verse>(`/verses/${id}`, { verse: data, category_ids: data.category_ids, category_notes: data.category_notes, category_prominent: data.category_prominent, tag_names: data.tag_names });
 export const deleteVerse = (id: number) => api.delete(`/verses/${id}`);
 
 // Verse References

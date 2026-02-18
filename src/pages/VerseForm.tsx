@@ -25,6 +25,8 @@ export default function VerseForm() {
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [categoryNotes, setCategoryNotes] = useState<Record<number, string>>({});
   const [categoryProminent, setCategoryProminent] = useState<Record<number, boolean>>({});
+  const [tagNames, setTagNames] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   // Working book for continuous entry
   const [workingBook, setWorkingBook] = useState<BibleBook | null>(null);
@@ -62,6 +64,9 @@ export default function VerseForm() {
           });
           setCategoryNotes(notes);
           setCategoryProminent(prominent);
+          if (verse.tags) {
+            setTagNames(verse.tags.map((t) => t.name));
+          }
         })
         .finally(() => setLoading(false));
     }
@@ -119,6 +124,7 @@ export default function VerseForm() {
         category_ids: selectedCategories,
         category_notes: categoryNotes,
         category_prominent: categoryProminent,
+        tag_names: tagNames,
       };
 
       if (isEdit && id) {
@@ -143,6 +149,8 @@ export default function VerseForm() {
           setSelectedCategories([]);
           setCategoryNotes({});
           setCategoryProminent({});
+          setTagNames([]);
+          setTagInput('');
           setSelectedBook(workingBook);
           setSuccessMessage(`Added ${newReference} - ready for next verse`);
           // Clear success message after 3 seconds
@@ -307,6 +315,47 @@ export default function VerseForm() {
               })}
             </div>
           )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+          <p className="text-xs text-gray-500 mb-2">Type a tag name and press Enter or comma to add</p>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {tagNames.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => setTagNames((prev) => prev.filter((t) => t !== tag))}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </span>
+            ))}
+          </div>
+          <input
+            type="text"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const name = tagInput.trim().toLowerCase().replace(/,/g, '');
+                if (name && !tagNames.includes(name)) {
+                  setTagNames((prev) => [...prev, name]);
+                }
+                setTagInput('');
+              }
+            }}
+            placeholder="e.g. atonement, grace, salvation..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
         <div>

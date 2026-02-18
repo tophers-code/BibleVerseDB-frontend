@@ -260,6 +260,22 @@ export default function VerseDetail() {
           )}
         </div>
 
+        {verse.tags && verse.tags.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-sm font-medium text-gray-700 mb-2">Tags</h2>
+            <div className="flex flex-wrap gap-2">
+              {verse.tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm"
+                >
+                  {tag.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {verse.notes && (
           <div className="mb-6">
             <h2 className="text-sm font-medium text-gray-700 mb-2">Notes</h2>

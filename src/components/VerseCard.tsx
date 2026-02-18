@@ -36,6 +36,14 @@ export default function VerseCard({ verse, onDelete }: VerseCardProps) {
         {verse.categories.map((category) => (
           <CategoryTag key={category.id} category={category} />
         ))}
+        {verse.tags?.map((tag) => (
+          <span
+            key={tag.id}
+            className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-xs"
+          >
+            {tag.name}
+          </span>
+        ))}
       </div>
 
       {verse.notes && (

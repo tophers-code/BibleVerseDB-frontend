@@ -21,6 +21,12 @@ export interface Category {
   updated_at?: string;
 }
 
+export interface Tag {
+  id: number;
+  name: string;
+  verses_count?: number;
+}
+
 export interface Verse {
   id: number;
   reference: string;
@@ -30,6 +36,7 @@ export interface Verse {
   verse_end: number | null;
   notes: string | null;
   categories: Category[];
+  tags: Tag[];
   referenced_verses?: VerseReference[];
   referencing_verses?: VerseReference[];
   created_at: string;
@@ -65,6 +72,7 @@ export interface VerseFormData {
   category_ids?: number[];
   category_notes?: Record<number, string>;
   category_prominent?: Record<number, boolean>;
+  tag_names?: string[];
 }
 
 export type ColorCode =

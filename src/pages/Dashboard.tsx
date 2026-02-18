@@ -171,6 +171,14 @@ export default function Dashboard() {
                   {verse.categories.map((cat) => (
                     <CategoryTag key={cat.id} category={cat} />
                   ))}
+                  {verse.tags?.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-xs"
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
                 </div>
               </li>
             ))}
