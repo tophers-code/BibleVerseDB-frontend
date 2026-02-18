@@ -6,6 +6,7 @@ import { usePreferredVersion } from '../contexts/PreferredVersionContext';
 
 export default function Settings() {
   const { preferredVersion, setPreferredVersion } = usePreferredVersion();
+  const [savedMessage, setSavedMessage] = useState(false);
   const [providers, setProviders] = useState<ProviderStatus[]>([]);
   const [totalVerses, setTotalVerses] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -53,13 +54,22 @@ export default function Settings() {
         </p>
         <select
           value={preferredVersion}
-          onChange={(e) => setPreferredVersion(e.target.value)}
+          onChange={(e) => {
+            setPreferredVersion(e.target.value);
+            setSavedMessage(true);
+            setTimeout(() => setSavedMessage(false), 2000);
+          }}
           className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {VERSIONS.map((v) => (
             <option key={v.id} value={v.id}>{v.name}</option>
           ))}
         </select>
+        {savedMessage && (
+          <p className="mt-2 text-sm text-green-600 font-medium animate-pulse">
+            Preference saved
+          </p>
+        )}
       </div>
 
       <div>
