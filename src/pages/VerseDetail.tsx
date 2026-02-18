@@ -4,17 +4,17 @@ import { getVerse, deleteVerse, getVerses, addVerseReference, removeVerseReferen
 import type { Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
 
-const VERSION_NAMES: Record<string, string> = {
-  'esv': 'English Standard Version',
-  'nlt': 'New Living Translation',
-  'niv': 'New International Version',
-  'nasb': 'New American Standard Bible',
-  'csb': 'Christian Standard Bible',
-  'en-asv': 'American Standard Version',
-  'en-t4t': 'Translation for Translators',
-  'en-bsb': 'Berean Study Bible',
-  'en-web': 'World English Bible',
-};
+const VERSIONS = [
+  { id: 'esv', name: 'English Standard Version' },
+  { id: 'nlt', name: 'New Living Translation' },
+  { id: 'niv', name: 'New International Version' },
+  { id: 'nasb', name: 'New American Standard Bible' },
+  { id: 'csb', name: 'Christian Standard Bible' },
+  { id: 'en-bsb', name: 'Berean Study Bible' },
+  { id: 'en-asv', name: 'American Standard Version' },
+  { id: 'en-web', name: 'World English Bible' },
+  { id: 'en-t4t', name: 'Translation for Translators' },
+];
 
 export default function VerseDetail() {
   const { id } = useParams();
@@ -78,10 +78,13 @@ export default function VerseDetail() {
     setError(null);
 
     try {
-      // Delete the cached version first
-      await deleteVerseText(verse.id, version);
+      // Delete the cached version first if it exists
+      const existing = verseTexts.find((vt) => vt.version === version);
+      if (existing) {
+        await deleteVerseText(verse.id, version);
+      }
 
-      // Fetch the fresh version
+      // Fetch the (fresh) version
       const res = await getVerseText(verse.id, version);
 
       // Update the verseTexts array with the new text
@@ -89,8 +92,7 @@ export default function VerseDetail() {
         const filtered = prev.filter((vt) => vt.version !== version);
         return [...filtered, { version: res.data.version, text: res.data.text, version_name: res.data.version_name }]
           .sort((a, b) => {
-            // Keep the original order from VERSION_NAMES
-            const order = Object.keys(VERSION_NAMES);
+            const order = VERSIONS.map((v) => v.id);
             return order.indexOf(a.version) - order.indexOf(b.version);
           });
       });
@@ -194,43 +196,49 @@ export default function VerseDetail() {
 
           {verseTexts.length > 0 ? (
             <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {verseTexts.map((vt) => (
-                  <div key={vt.version} className="flex items-center gap-1">
-                    <button
-                      onClick={() => setSelectedVersion(vt.version)}
-                      className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                        selectedVersion === vt.version
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {vt.version_name || VERSION_NAMES[vt.version] || vt.version}
-                    </button>
-                    <button
-                      onClick={() => handleRefreshSingleVersion(vt.version)}
-                      disabled={refreshingVersion === vt.version}
-                      className="p-1 text-gray-400 hover:text-blue-600 disabled:opacity-50"
-                      title={`Refresh ${vt.version_name || VERSION_NAMES[vt.version] || vt.version}`}
-                    >
-                      {refreshingVersion === vt.version ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                ))}
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedVersion}
+                  onChange={(e) => setSelectedVersion(e.target.value)}
+                  className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                    {VERSIONS.map((v) => {
+                    const fetched = verseTexts.some((vt) => vt.version === v.id);
+                    return (
+                      <option key={v.id} value={v.id}>
+                        {v.name}{!fetched ? ' (not fetched)' : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+                <button
+                  onClick={() => handleRefreshSingleVersion(selectedVersion)}
+                  disabled={refreshingVersion === selectedVersion}
+                  className="p-1.5 text-gray-500 hover:text-blue-600 disabled:opacity-50 border border-gray-300 rounded-md"
+                  title="Refresh selected translation"
+                >
+                  {refreshingVersion === selectedVersion ? (
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  )}
+                </button>
               </div>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <p className="text-gray-800 leading-relaxed italic">
-                  {verseTexts.find((vt) => vt.version === selectedVersion)?.text || 'Select a version'}
-                </p>
+                {verseTexts.find((vt) => vt.version === selectedVersion)?.text ? (
+                  <p className="text-gray-800 leading-relaxed italic">
+                    {verseTexts.find((vt) => vt.version === selectedVersion)!.text}
+                  </p>
+                ) : (
+                  <p className="text-gray-400 text-sm italic">
+                    This translation hasn't been fetched yet. Click the refresh button to fetch it.
+                  </p>
+                )}
               </div>
             </div>
           ) : (
