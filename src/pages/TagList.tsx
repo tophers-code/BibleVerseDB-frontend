@@ -47,8 +47,8 @@ export default function TagList() {
                   {tag.verses_count || 0} {tag.verses_count === 1 ? 'verse' : 'verses'}
                 </span>
               </div>
-              {tag.description && (
-                <p className="text-gray-600 text-sm line-clamp-2">{tag.description}</p>
+              {tag.definition && (
+                <p className="text-gray-600 text-sm">{tag.definition}</p>
               )}
             </Link>
           ))}

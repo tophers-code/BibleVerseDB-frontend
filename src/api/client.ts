@@ -27,9 +27,9 @@ export const deleteCategory = (id: number) => api.delete(`/categories/${id}`);
 export const getTags = (params?: { with_verses?: boolean; bible_book_id?: number; category_id?: number }) =>
   api.get<Tag[]>('/tags', { params });
 export const getTag = (id: number) => api.get<Tag>(`/tags/${id}`);
-export const createTag = (data: { name: string; description?: string }) =>
+export const createTag = (data: { name: string; definition?: string; description?: string }) =>
   api.post<Tag>('/tags', { tag: data });
-export const updateTag = (id: number, data: { name?: string; description?: string }) =>
+export const updateTag = (id: number, data: { name?: string; definition?: string; description?: string }) =>
   api.patch<Tag>(`/tags/${id}`, { tag: data });
 export const deleteTag = (id: number) => api.delete(`/tags/${id}`);
 
@@ -52,9 +52,9 @@ export const removeVerseReference = (verseId: number, referencedVerseId: number)
 // Progressions
 export const getProgressions = () => api.get<VerseProgression[]>('/progressions');
 export const getProgression = (id: number) => api.get<VerseProgression>(`/progressions/${id}`);
-export const createProgression = (data: { name: string; description?: string }) =>
+export const createProgression = (data: { name: string; definition?: string; description?: string }) =>
   api.post<VerseProgression>('/progressions', { progression: data });
-export const updateProgression = (id: number, data: { name?: string; description?: string }) =>
+export const updateProgression = (id: number, data: { name?: string; definition?: string; description?: string }) =>
   api.patch<VerseProgression>(`/progressions/${id}`, { progression: data });
 export const deleteProgression = (id: number) => api.delete(`/progressions/${id}`);
 

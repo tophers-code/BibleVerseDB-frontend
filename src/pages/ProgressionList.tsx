@@ -59,8 +59,8 @@ export default function ProgressionList() {
                   >
                     {progression.name}
                   </Link>
-                  {progression.description && (
-                    <p className="text-gray-600 text-sm mt-1">{progression.description}</p>
+                  {progression.definition && (
+                    <p className="text-gray-600 text-sm mt-1">{progression.definition}</p>
                   )}
                 </div>
                 <div className="flex gap-3">

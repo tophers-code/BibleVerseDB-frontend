@@ -25,6 +25,7 @@ export interface Category {
 export interface Tag {
   id: number;
   name: string;
+  definition?: string;
   description?: string;
   verses_count?: number;
 }
@@ -53,6 +54,7 @@ export interface VerseReference {
 export interface VerseProgression {
   id: number;
   name: string;
+  definition?: string;
   description: string | null;
   steps: ProgressionStep[];
   created_at: string;

@@ -8,6 +8,7 @@ export default function TagForm() {
   const isEditing = Boolean(id);
 
   const [name, setName] = useState('');
+  const [definition, setDefinition] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +19,7 @@ export default function TagForm() {
       getTag(parseInt(id))
         .then((res) => {
           setName(res.data.name);
+          setDefinition(res.data.definition || '');
           setDescription(res.data.description || '');
         })
         .catch(() => setError('Failed to load tag'))
@@ -32,10 +34,10 @@ export default function TagForm() {
 
     try {
       if (isEditing && id) {
-        await updateTag(parseInt(id), { name, description });
+        await updateTag(parseInt(id), { name, definition, description });
         navigate(`/tags/${id}`);
       } else {
-        const res = await createTag({ name, description });
+        const res = await createTag({ name, definition, description });
         navigate(`/tags/${res.data.id}`);
       }
     } catch (err: any) {
@@ -71,6 +73,19 @@ export default function TagForm() {
             onChange={(e) => setName(e.target.value)}
             required
             placeholder="e.g., atonement"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Definition
+          </label>
+          <input
+            type="text"
+            value={definition}
+            onChange={(e) => setDefinition(e.target.value)}
+            placeholder="e.g., The reconciliation of God and humankind through Christ"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

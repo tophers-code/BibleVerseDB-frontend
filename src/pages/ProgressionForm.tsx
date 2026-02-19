@@ -17,6 +17,7 @@ export default function ProgressionForm() {
   const isEdit = Boolean(id);
 
   const [name, setName] = useState('');
+  const [definition, setDefinition] = useState('');
   const [description, setDescription] = useState('');
   const [steps, setSteps] = useState<ProgressionStep[]>([]);
   const [verses, setVerses] = useState<Verse[]>([]);
@@ -36,6 +37,7 @@ export default function ProgressionForm() {
           const progressionRes = await getProgression(parseInt(id));
           const progression = progressionRes.data;
           setName(progression.name);
+          setDefinition(progression.definition || '');
           setDescription(progression.description || '');
           setSteps(progression.steps);
           setProgressionId(progression.id);
@@ -62,10 +64,10 @@ export default function ProgressionForm() {
 
     try {
       if (isEdit && id) {
-        await updateProgression(parseInt(id), { name, description: description || undefined });
+        await updateProgression(parseInt(id), { name, definition: definition || undefined, description: description || undefined });
         navigate(`/progressions/${id}`);
       } else {
-        const res = await createProgression({ name, description: description || undefined });
+        const res = await createProgression({ name, definition: definition || undefined, description: description || undefined });
         // Navigate to detail page to add steps
         navigate(`/progressions/${res.data.id}`);
       }
@@ -164,6 +166,19 @@ export default function ProgressionForm() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
+            Definition
+          </label>
+          <input
+            type="text"
+            value={definition}
+            onChange={(e) => setDefinition(e.target.value)}
+            placeholder="e.g., A short summary of the progression's theme"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Description
             <span className="ml-2 text-xs font-normal text-gray-400">Supports Markdown</span>
           </label>
@@ -171,7 +186,7 @@ export default function ProgressionForm() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            placeholder="Describe the theme or purpose of this progression..."
+            placeholder="Long-form doctrinal description..."
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

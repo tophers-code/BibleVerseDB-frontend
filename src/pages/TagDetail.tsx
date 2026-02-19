@@ -61,6 +61,9 @@ export default function TagDetail() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">{tag.name}</h1>
+            {tag.definition && (
+              <p className="text-gray-600 mt-1">{tag.definition}</p>
+            )}
             <p className="text-sm text-gray-500 mt-1">
               {verses.length} {verses.length === 1 ? 'verse' : 'verses'} with this tag
             </p>

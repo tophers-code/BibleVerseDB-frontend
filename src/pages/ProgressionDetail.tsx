@@ -106,6 +106,9 @@ export default function ProgressionDetail() {
       <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{progression.name}</h1>
+          {progression.definition && (
+            <p className="text-gray-600 mt-1">{progression.definition}</p>
+          )}
           {progression.description && (
             <Markdown className="mt-2">{progression.description}</Markdown>
           )}
