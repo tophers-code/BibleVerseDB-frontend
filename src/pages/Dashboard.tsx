@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getCategories, getVerses } from '../api/client';
+import { getCategories, getVerses, getTags, getProgressions } from '../api/client';
 import type { Category, Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
 
@@ -70,7 +70,7 @@ function PieChart({ categories }: { categories: Category[] }) {
         ))}
       </svg>
       <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center">
-        {slices.map(({ cat, fill, fraction }) => (
+        {slices.map(({ cat, fill }) => (
           <div key={cat.id} className="flex items-center gap-1.5 text-xs text-gray-700">
             <span
               className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -88,13 +88,18 @@ function PieChart({ categories }: { categories: Category[] }) {
 export default function Dashboard() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentVerses, setRecentVerses] = useState<Verse[]>([]);
+  const [stats, setStats] = useState({ verses: 0, tags: 0, progressions: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getCategories(), getVerses()])
-      .then(([catRes, verseRes]) => {
+    Promise.all([getCategories(), getVerses(), getTags(), getProgressions()])
+      .then(([catRes, verseRes, tagRes, progRes]) => {
         setCategories(catRes.data);
-        // Sort by created_at descending (newest first) and take the first 5
+        setStats({
+          verses: verseRes.data.length,
+          tags: tagRes.data.length,
+          progressions: progRes.data.length,
+        });
         const sortedVerses = [...verseRes.data].sort(
           (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
@@ -116,6 +121,21 @@ export default function Dashboard() {
         </p>
       </div>
 
+      <div className="bg-white rounded-lg shadow-md">
+        <div className="grid grid-cols-3 divide-x divide-gray-100">
+          {[
+            { label: 'Verses', value: stats.verses, to: '/verses' },
+            { label: 'Tags', value: stats.tags, to: '/tags' },
+            { label: 'Progressions', value: stats.progressions, to: '/progressions' },
+          ].map(({ label, value, to }) => (
+            <Link key={label} to={to} className="flex flex-col items-center py-6 hover:bg-gray-50 transition-colors rounded-lg">
+              <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{label}</span>
+              <span className="text-4xl font-bold text-slate-800 mt-1">{value}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-slate-800 mb-4">Quick Actions</h2>
@@ -131,6 +151,12 @@ export default function Dashboard() {
               className="block w-full px-4 py-3 bg-slate-600 text-white rounded-md text-center hover:bg-slate-700 transition-colors"
             >
               View All Verses
+            </Link>
+            <Link
+              to="/progressions/new"
+              className="block w-full px-4 py-3 bg-teal-600 text-white rounded-md text-center hover:bg-teal-700 transition-colors"
+            >
+              Add a Progression
             </Link>
           </div>
         </div>
