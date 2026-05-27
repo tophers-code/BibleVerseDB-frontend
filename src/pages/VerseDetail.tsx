@@ -1,15 +1,25 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { getVerse, deleteVerse, getVerses, addVerseReference, removeVerseReference, getVerseTexts, fetchAllVerseTexts, getVerseText, deleteVerseText, type VerseTextResponse } from '../api/client';
 import type { Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
 import Markdown from '../components/Markdown';
 import { VERSIONS } from '../constants';
 import { usePreferredVersion } from '../contexts/PreferredVersionContext';
+import { useAuth } from '../contexts/AuthContext';
+
+interface NavState {
+  backPath?: string;
+  backLabel?: string;
+  verseIds?: number[];
+}
 
 export default function VerseDetail() {
+  const { isAdmin } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const navState = (location.state as NavState) || {};
   const { preferredVersion } = usePreferredVersion();
   const [verse, setVerse] = useState<Verse | null>(null);
   const [allVerses, setAllVerses] = useState<Verse[]>([]);
@@ -152,20 +162,22 @@ export default function VerseDetail() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-start mb-4">
           <h1 className="text-2xl font-bold text-slate-800">{verse.reference}</h1>
-          <div className="flex gap-2">
-            <Link
-              to={`/verses/${verse.id}/edit`}
-              className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-            >
-              Edit
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-            >
-              Delete
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Link
+                to={`/verses/${verse.id}/edit`}
+                className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Edit
+              </Link>
+              <button
+                onClick={handleDelete}
+                className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="mb-4">
@@ -177,13 +189,15 @@ export default function VerseDetail() {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-sm font-medium text-gray-700">Verse Text</h2>
-            <button
-              onClick={handleFetchTexts}
-              disabled={fetchingTexts}
-              className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
-            >
-              {fetchingTexts ? 'Fetching...' : verseTexts.length > 0 ? 'Refresh' : 'Fetch Text'}
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleFetchTexts}
+                disabled={fetchingTexts}
+                className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+              >
+                {fetchingTexts ? 'Fetching...' : verseTexts.length > 0 ? 'Refresh' : 'Fetch Text'}
+              </button>
+            )}
           </div>
 
           {verseTexts.length > 0 ? (
@@ -203,23 +217,25 @@ export default function VerseDetail() {
                     );
                   })}
                 </select>
-                <button
-                  onClick={() => handleRefreshSingleVersion(selectedVersion)}
-                  disabled={refreshingVersion === selectedVersion}
-                  className="p-1.5 text-gray-500 hover:text-blue-600 disabled:opacity-50 border border-gray-300 rounded-md"
-                  title="Refresh selected translation"
-                >
-                  {refreshingVersion === selectedVersion ? (
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  )}
-                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleRefreshSingleVersion(selectedVersion)}
+                    disabled={refreshingVersion === selectedVersion}
+                    className="p-1.5 text-gray-500 hover:text-blue-600 disabled:opacity-50 border border-gray-300 rounded-md"
+                    title="Refresh selected translation"
+                  >
+                    {refreshingVersion === selectedVersion ? (
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    )}
+                  </button>
+                )}
               </div>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 {verseTexts.find((vt) => vt.version === selectedVersion)?.text ? (
@@ -238,6 +254,71 @@ export default function VerseDetail() {
               Click "Fetch Text" to load the verse text from Bible API.
             </p>
           )}
+        </div>
+
+        <div className="mb-6">
+          <h2 className="text-sm font-medium text-gray-700 mb-2">Study In</h2>
+          {(() => {
+            const versionMap: Record<string, string> = {
+              'esv': 'ESV', 'nlt': 'NLT', 'niv': 'NIV', 'nasb': 'NASB',
+              'csb': 'CSB', 'en-bsb': 'BSB', 'en-asv': 'ASV', 'en-web': 'WEB',
+            };
+            const v = versionMap[selectedVersion] ?? 'ESV';
+            const ref = encodeURIComponent(verse.reference);
+
+            // Logos uses OT book_order as-is (1–39); NT offset by +21 (Matthew 40 → 61, Romans 45 → 66)
+            const logosBookNum = verse.bible_book.book_order <= 39
+              ? verse.bible_book.book_order
+              : verse.bible_book.book_order + 21;
+            const logosVersionMap: Record<string, { bookId: string; refCode: string }> = {
+              'esv':  { bookId: 'LLS%3A1.0.710',  refCode: 'esv' },
+              'nlt':  { bookId: 'LLS%3A1.0.171',  refCode: 'nlt' },
+              'niv':  { bookId: 'LLS%3ANIV2011',  refCode: 'niv' },
+              'nasb': { bookId: 'LLS%3A1.0.71',   refCode: 'nasb95' },
+              'csb':  { bookId: 'LLS%3ACSB',      refCode: 'csb2' },
+            };
+            const logosInfo = logosVersionMap[selectedVersion];
+            const logosUrl = logosInfo
+              ? `https://app.logos.com/books/${logosInfo.bookId}/references/bible%2B${logosInfo.refCode}.${logosBookNum}.${verse.chapter}.${verse.verse_start}`
+              : `https://app.logos.com/search?query=${ref}`;
+
+            const links = [
+              {
+                label: 'BibleGateway',
+                url: `https://www.biblegateway.com/passage/?search=${ref}&version=${v}`,
+                color: '#80250D',
+              },
+              {
+                label: 'Blue Letter Bible',
+                url: `https://www.blueletterbible.org/search/preSearch.cfm?Criteria=${ref}&t=${v}`,
+                color: '#485B84',
+              },
+              {
+                label: 'Logos',
+                url: logosUrl,
+                color: '#426AFA',
+              },
+            ];
+            return (
+              <div className="flex flex-wrap gap-2">
+                {links.map(({ label, url, color }) => (
+                  <a
+                    key={label}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ backgroundColor: color }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-white rounded-md transition-[filter] hover:brightness-90"
+                  >
+                    {label}
+                    <svg className="w-3 h-3 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
         <div className="mb-6">
@@ -265,12 +346,13 @@ export default function VerseDetail() {
             <h2 className="text-sm font-medium text-gray-700 mb-2">Tags</h2>
             <div className="flex flex-wrap gap-2">
               {verse.tags.map((tag) => (
-                <span
+                <Link
                   key={tag.id}
-                  className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm"
+                  to={`/tags/${tag.id}`}
+                  className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm hover:bg-slate-200 hover:text-slate-900 transition-colors"
                 >
                   {tag.name}
-                </span>
+                </Link>
               ))}
             </div>
           </div>
@@ -292,12 +374,14 @@ export default function VerseDetail() {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-sm font-medium text-gray-700">Cross-References</h2>
-            <button
-              onClick={() => setShowReferenceForm(!showReferenceForm)}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              {showReferenceForm ? 'Cancel' : '+ Add Reference'}
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowReferenceForm(!showReferenceForm)}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                {showReferenceForm ? 'Cancel' : '+ Add Reference'}
+              </button>
+            )}
           </div>
 
           {showReferenceForm && (
@@ -341,15 +425,17 @@ export default function VerseDetail() {
                     >
                       {ref.reference}
                     </Link>
-                    <button
-                      onClick={() => handleRemoveReference(ref.id)}
-                      className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Remove reference"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleRemoveReference(ref.id)}
+                        className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove reference"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -378,10 +464,40 @@ export default function VerseDetail() {
           </div>
         )}
 
-        <div className="pt-4 border-t border-gray-200">
-          <Link to="/verses" className="text-blue-600 hover:text-blue-800">
-            &larr; Back to all verses
+        <div className="pt-4 border-t border-gray-200 flex items-center justify-between gap-4">
+          <Link
+            to={navState.backPath ?? '/verses'}
+            className="text-blue-600 hover:text-blue-800 text-sm"
+          >
+            &larr; {navState.backLabel ? `Back to "${navState.backLabel}"` : 'Back to all verses'}
           </Link>
+
+          {navState.verseIds && navState.verseIds.length > 1 && (() => {
+            const currentIndex = navState.verseIds!.indexOf(parseInt(id!));
+            const prevId = currentIndex > 0 ? navState.verseIds![currentIndex - 1] : null;
+            const nextId = currentIndex < navState.verseIds!.length - 1 ? navState.verseIds![currentIndex + 1] : null;
+            return (
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-gray-400">{currentIndex + 1} / {navState.verseIds!.length}</span>
+                <Link
+                  to={prevId ? `/verses/${prevId}` : '#'}
+                  state={navState}
+                  aria-disabled={!prevId}
+                  className={prevId ? 'text-blue-600 hover:text-blue-800' : 'text-gray-300 pointer-events-none'}
+                >
+                  ← Prev
+                </Link>
+                <Link
+                  to={nextId ? `/verses/${nextId}` : '#'}
+                  state={navState}
+                  aria-disabled={!nextId}
+                  className={nextId ? 'text-blue-600 hover:text-blue-800' : 'text-gray-300 pointer-events-none'}
+                >
+                  Next →
+                </Link>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
