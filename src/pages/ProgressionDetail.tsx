@@ -5,8 +5,10 @@ import type { VerseProgression, Verse } from '../types';
 import { VERSIONS } from '../constants';
 import Markdown from '../components/Markdown';
 import { usePreferredVersion } from '../contexts/PreferredVersionContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProgressionDetail() {
+  const { isAdmin } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [progression, setProgression] = useState<VerseProgression | null>(null);
@@ -113,20 +115,22 @@ export default function ProgressionDetail() {
             <Markdown className="mt-2">{progression.description}</Markdown>
           )}
         </div>
-        <div className="flex gap-2">
-          <Link
-            to={`/progressions/${progression.id}/edit`}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Edit
-          </Link>
-          <button
-            onClick={handleDelete}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-          >
-            Delete
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <Link
+              to={`/progressions/${progression.id}/edit`}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Edit
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">

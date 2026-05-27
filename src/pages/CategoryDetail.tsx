@@ -5,8 +5,10 @@ import type { Category, Verse } from '../types';
 import CategoryTag from '../components/CategoryTag';
 import VerseCard from '../components/VerseCard';
 import Markdown from '../components/Markdown';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function CategoryDetail() {
+  const { isAdmin } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [category, setCategory] = useState<Category | null>(null);
@@ -88,20 +90,22 @@ export default function CategoryDetail() {
               {verses.length} {verses.length === 1 ? 'verse' : 'verses'} in this category
             </p>
           </div>
-          <div className="flex gap-2">
-            <Link
-              to={`/categories/${category.id}/edit`}
-              className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-            >
-              Edit
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-            >
-              Delete
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Link
+                to={`/categories/${category.id}/edit`}
+                className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Edit
+              </Link>
+              <button
+                onClick={handleDelete}
+                className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
         {category.description && (
           <div className="mt-4">
@@ -143,7 +147,14 @@ export default function CategoryDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {displayedVerses.map((verse) => (
               <div key={verse.id} className={isProminentForCategory(verse) ? 'ring-2 ring-yellow-400 rounded-lg' : ''}>
-                <VerseCard verse={verse} />
+                <VerseCard
+                  verse={verse}
+                  linkState={{
+                    backPath: `/categories/${category.id}`,
+                    backLabel: category.name,
+                    verseIds: displayedVerses.map((v) => v.id),
+                  }}
+                />
               </div>
             ))}
           </div>

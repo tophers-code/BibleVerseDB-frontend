@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { getCategories } from '../api/client';
 import type { Category } from '../types';
 import CategoryTag from '../components/CategoryTag';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function CategoryList() {
+  const { isAdmin } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,12 +24,14 @@ export default function CategoryList() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-slate-800">Theological Categories</h1>
-        <Link
-          to="/categories/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          + New Category
-        </Link>
+        {isAdmin && (
+          <Link
+            to="/categories/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            + New Category
+          </Link>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

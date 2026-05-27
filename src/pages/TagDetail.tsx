@@ -4,8 +4,10 @@ import { getTag, getVerses, deleteTag } from '../api/client';
 import type { Tag, Verse } from '../types';
 import VerseCard from '../components/VerseCard';
 import Markdown from '../components/Markdown';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function TagDetail() {
+  const { isAdmin } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [tag, setTag] = useState<Tag | null>(null);
@@ -68,20 +70,22 @@ export default function TagDetail() {
               {verses.length} {verses.length === 1 ? 'verse' : 'verses'} with this tag
             </p>
           </div>
-          <div className="flex gap-2">
-            <Link
-              to={`/tags/${tag.id}/edit`}
-              className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-            >
-              Edit
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-            >
-              Delete
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Link
+                to={`/tags/${tag.id}/edit`}
+                className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                Edit
+              </Link>
+              <button
+                onClick={handleDelete}
+                className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
         {tag.description && (
           <div className="mt-4">
@@ -103,7 +107,15 @@ export default function TagDetail() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {verses.map((verse) => (
-              <VerseCard key={verse.id} verse={verse} />
+              <VerseCard
+                key={verse.id}
+                verse={verse}
+                linkState={{
+                  backPath: `/tags/${tag.id}`,
+                  backLabel: tag.name,
+                  verseIds: verses.map((v) => v.id),
+                }}
+              />
             ))}
           </div>
         )}

@@ -9,7 +9,7 @@ import {
   removeProgressionStep,
   reorderProgressionSteps,
 } from '../api/client';
-import type { Verse, VerseProgression, ProgressionStep } from '../types';
+import type { Verse, ProgressionStep } from '../types';
 
 export default function ProgressionForm() {
   const { id } = useParams();

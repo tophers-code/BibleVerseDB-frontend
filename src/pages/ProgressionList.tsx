@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getProgressions, deleteProgression } from '../api/client';
 import type { VerseProgression } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProgressionList() {
+  const { isAdmin } = useAuth();
   const [progressions, setProgressions] = useState<VerseProgression[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,12 +30,14 @@ export default function ProgressionList() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-slate-800">Verse Progressions</h1>
-        <Link
-          to="/progressions/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Create Progression
-        </Link>
+        {isAdmin && (
+          <Link
+            to="/progressions/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Create Progression
+          </Link>
+        )}
       </div>
 
       <p className="text-gray-600">
@@ -63,20 +67,22 @@ export default function ProgressionList() {
                     <p className="text-gray-600 text-sm mt-1">{progression.definition}</p>
                   )}
                 </div>
-                <div className="flex gap-3">
-                  <Link
-                    to={`/progressions/${progression.id}/edit`}
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(progression.id)}
-                    className="text-sm text-red-600 hover:text-red-800"
-                  >
-                    Delete
-                  </button>
-                </div>
+                {isAdmin && (
+                  <div className="flex gap-3">
+                    <Link
+                      to={`/progressions/${progression.id}/edit`}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(progression.id)}
+                      className="text-sm text-red-600 hover:text-red-800"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
 
               {progression.steps.length > 0 && (
