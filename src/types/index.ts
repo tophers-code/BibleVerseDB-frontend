@@ -1,3 +1,10 @@
+export interface PortalUser {
+  id: number;
+  email: string;
+  role: 'admin' | 'user';
+  created_at: string;
+}
+
 export interface BibleBook {
   id: number;
   name: string;

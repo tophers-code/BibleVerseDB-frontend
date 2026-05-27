@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { BibleBook, Category, Tag, Verse, VerseFormData, VerseProgression } from '../types';
+import type { BibleBook, Category, Tag, Verse, VerseFormData, VerseProgression, PortalUser } from '../types';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -7,6 +7,26 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Bible Books
 export const getBibleBooks = (params?: { with_verses?: boolean; category_id?: number }) =>
@@ -73,7 +93,7 @@ export const reorderProgressionSteps = (progressionId: number, stepIds: number[]
 export interface VerseTextResponse {
   version: string;
   text: string;
-  version_name: string;
+  version_name?: string;
 }
 
 export interface VerseTextsListResponse {
@@ -134,5 +154,13 @@ export const getVerseTextStatus = () =>
 
 export const batchFetchVerseTexts = (version: string) =>
   api.post<BatchFetchResponse>('/verse_texts/batch_fetch', { version });
+
+// Users (admin only)
+export const getUsers = () => api.get<PortalUser[]>('/users');
+export const createUser = (data: { email: string; password: string; role: 'admin' | 'user' }) =>
+  api.post<PortalUser>('/users', { user: data });
+export const updateUser = (id: number, data: { role?: 'admin' | 'user'; password?: string }) =>
+  api.patch<PortalUser>(`/users/${id}`, { user: data });
+export const deleteUser = (id: number) => api.delete(`/users/${id}`);
 
 export default api;
