@@ -136,6 +136,10 @@ export default function Settings() {
           ))}
         </div>
       </div>
+
+      <p className="text-center text-xs text-gray-400 pt-4">
+        Bible Verse DB &nbsp;·&nbsp; v{__APP_VERSION__} &nbsp;·&nbsp; Built {new Date(__BUILD_DATE__).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </p>
     </div>
   );
 }
